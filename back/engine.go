@@ -29,6 +29,19 @@ func main() {
 		return c.SendString("Hello, World!")
 	})
 
+	setupRoutes(app)
+
+	// Ensure base directory and projects subdirectory exist
+	/*baseDir := "./host"
+	projectsDir := filepath.Join(baseDir, "projects")
+	ensureDir(baseDir)
+	ensureDir(projectsDir)
+
+	// API endpoint to list files and folders in the base directory
+	app.Get("/files", func(c *fiber.Ctx) error {
+		return c.JSON(listFilesInDir(baseDir))
+	})*/
+
 	// Serve React static files - adjust "build" to the path of your React build directory
 	//app.Static("/", "./front/build")
 
