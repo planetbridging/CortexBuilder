@@ -10,7 +10,7 @@ setChonkyDefaults({ iconComponent: ChonkyIconFA });
 class OFileBrowser extends React.Component {
   state = {
     files: [],
-    folderChain: [],
+    folderChain: [{ id: "/", name: "Home" }],
     currentPath: "/", // Start at root
   };
 
@@ -20,7 +20,7 @@ class OFileBrowser extends React.Component {
 
   fetchFileData = (path) => {
     axios
-      .get(`http://localhost:4123/files${path}`) // Adjust the URL as needed
+      .get(`http://localhost:4123/files/host${path}`) // Adjust the URL as needed
       .then((response) => {
         this.setState({
           files: response.data.files,
@@ -33,29 +33,28 @@ class OFileBrowser extends React.Component {
       });
   };
 
-  OLDhandleFileAction = (action) => {
-    console.log("Received action:", action); // Log the action object for debugging
-
-    // Ensure we're accessing properties safely
-    const file = action?.payload?.file;
-    if (!file) {
-      console.error("File data is missing in the action payload");
-      return;
-    }
-
-    if (action.id === "open_folder" && file.isDir) {
-      const newPath = `${this.state.currentPath}${file.id}/`;
-      this.fetchFileData(newPath);
-    } else if (action.id === "show_file_details" && !file.isDir) {
-      alert(`Showing details for ${file.name}`);
-    }
-  };
-
   handleFileAction = (data) => {
-    console.log(data);
+    //console.log(data);
 
     const fileID = data?.action?.id;
-    console.log(fileID);
+    //console.log(fileID);
+
+    if (fileID == "open_folder") {
+      var selectedFolderArray = data?.state?.selectedFiles;
+      if (selectedFolderArray) {
+        if (selectedFolderArray.length > 0) {
+          var tmpKeyCheck = Object.keys(selectedFolderArray[0]);
+          if (tmpKeyCheck.includes("isDir")) {
+            if (selectedFolderArray[0].isDir == true) {
+              //console.log(selectedFolderArray[0].name);
+              const tmpNewPath = `${this.state.currentPath}${selectedFolderArray[0].name}/`;
+              //console.log(tmpNewPath);
+              this.fetchFileData(tmpNewPath);
+            }
+          }
+        }
+      }
+    }
     /*console.log("Received action:", data.action); // Log the action object for debugging
 
     const { action, payload } = data;
@@ -103,7 +102,7 @@ class OFileBrowser extends React.Component {
   };
 
   navigateToProjects = () => {
-    const projectsPath = "/host/projects/"; // Adjust based on your actual path structure
+    const projectsPath = "/projects/"; // Adjust based on your actual path structure
     this.fetchFileData(projectsPath);
   };
 
