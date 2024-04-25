@@ -53,8 +53,13 @@ class NeuralNetwork {
           0
         );
         sum += biases[nodeIndex];
+        console.log("================sum===============");
+        console.log(sum);
         return this.sigmoid(sum); // Apply activation function
       });
+
+      console.log("================outputs===============");
+      console.log(outputs);
 
       inputs = outputs; // Set outputs as inputs for the next layer
     }
