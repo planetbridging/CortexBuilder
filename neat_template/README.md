@@ -1,6 +1,6 @@
 # NEAT (NeuroEvolution of Augmenting Topologies)
 
-NEAT is an innovative AI framework for evolving artificial neural networks through genetic algorithms. Developed by Kenneth O. Stanley, NEAT allows for the simultaneous evolution of both the weights and architectures of neural networks.
+NEAT is a sophisticated type of TWEANN (Topology and Weight Evolving Artificial Neural Network) that utilizes genetic algorithms to evolve artificial neural networks. Developed by Kenneth O. Stanley, this innovative framework is designed to optimize both the structure (topology) and the synaptic strengths (weights) of neural networks simultaneously. By dynamically adapting network architectures and connection weights, NEAT efficiently tackles complex problems by evolving networks that are intricately tailored to specific tasks. This dual evolution approach allows NEAT to discover novel network topologies along with optimal weight configurations, making it a powerful tool for developing advanced neural models that can generalize well across varied datasets.
 
 ## Key Components and Concepts
 
