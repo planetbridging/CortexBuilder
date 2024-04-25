@@ -28,6 +28,11 @@ class NeuralNetwork {
         () => Math.random() * 2 - 1
       );
     }
+
+    console.log("================weights===============");
+    console.log(this.weights);
+    console.log("================biases===============");
+    console.log(this.biases);
   }
 
   sigmoid(x) {

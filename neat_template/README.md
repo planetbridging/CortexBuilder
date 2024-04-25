@@ -29,13 +29,14 @@ NEAT is a sophisticated type of TWEANN (Topology and Weight Evolving Artificial 
 
 ### 6. **Mutation**
 
-- **Weights Mutation**: Modifies the weights of connections.
-- **Add Node Mutation**: Inserts a new node by splitting an existing connection.
-- **Add Connection Mutation**: Creates a new connection between previously unconnected nodes.
-- **Connection Enable/Disable**: Toggles the enabled state of connections to explore different network configurations.
-- **Add Layer Mutation**: Adds entirely new layers to increase network depth.
-- **Activation Function Mutation**: Alters the activation function of nodes to suit different processing needs.
-- **Node Type Mutation**: Switches node types (e.g., from standard neurons to LSTM units or attention mechanisms) to enhance temporal and data-focused processing capabilities.
+- **Weights Mutation**: Modifies the weights of connections to adapt and refine the network’s responses to inputs.
+- **Bias Mutation**: Adjusts the biases of neurons to fine-tune the activation potential, enhancing the network's ability to fit complex patterns.
+- **Add Node Mutation**: Inserts a new node by splitting an existing connection, increasing the network’s depth and potential for complexity.
+- **Add Connection Mutation**: Creates a new connection between previously unconnected nodes, expanding the network’s capacity for diverse interactions.
+- **Connection Enable/Disable**: Toggles the enabled state of connections, allowing the network to experiment with different neural pathways without permanent structural changes.
+- **Add Layer Mutation**: Introduces entirely new layers to the network, significantly enhancing its depth and functional complexity.
+- **Activation Function Mutation**: Alters the activation function of nodes to better suit different types of data processing needs, adapting to the specific characteristics of the input data.
+- **Node Type Mutation**: Switches node types (e.g., from standard neurons to LSTM units or attention mechanisms), enabling the network to handle temporal dynamics or focus on relevant input features effectively.
 
 ### 7. **Speciation**
 
