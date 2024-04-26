@@ -1,4 +1,4 @@
-class LayeredNeuralNetwork {
+class FIXEDLayeredNeuralNetwork {
   constructor(networkConfig) {
     this.networkConfig = networkConfig;
     this.neurons = {};
@@ -51,10 +51,7 @@ class LayeredNeuralNetwork {
         sum += this.neurons[inputId] * connection.weight;
       }
       sum += node.bias;
-      outputs[nodeId] = this.neurons[nodeId] = this.activate(
-        node.activationType,
-        sum
-      );
+      outputs[nodeId] = this.activate(node.activationType, sum);
     }
 
     return outputs;
@@ -62,5 +59,5 @@ class LayeredNeuralNetwork {
 }
 
 module.exports = {
-  LayeredNeuralNetwork,
+  FIXEDLayeredNeuralNetwork,
 };

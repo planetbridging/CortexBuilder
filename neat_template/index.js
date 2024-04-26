@@ -10,6 +10,8 @@ const { ONN } = require("./ONN");
 const { FULLNeuralNetwork } = require("./fullFFNN");
 const { LayeredNeuralNetwork } = require("./layredfullFFNN");
 
+const { FIXEDLayeredNeuralNetwork } = require("./FixedLayeredNN");
+
 (async () => {
   console.log("welcome to neat template node/js to golang to compute shader");
   /*simpleTestingExample();
@@ -24,7 +26,8 @@ const { LayeredNeuralNetwork } = require("./layredfullFFNN");
   */
   //testing();
   //testingfullffnnrun();
-  testingLayeredFullFFNNrun();
+  //testingLayeredFullFFNNrun();
+  fixedtestingLayeredFullFFNNrun();
 })();
 
 function testing() {
@@ -78,6 +81,25 @@ function testingLayeredFullFFNNrun() {
 
     const networkConfig = JSON.parse(data);
     const nn = new LayeredNeuralNetwork(networkConfig);
+
+    // Example input values - adjust based on your actual input configuration
+    const inputValues = { 1: 1, 2: 0.5, 3: 0.75 };
+    const outputs = nn.feedforward(inputValues);
+    console.log("Network outputs:", outputs);
+  });
+}
+
+function fixedtestingLayeredFullFFNNrun() {
+  console.log("==============starting LAYERED full ff nn===========");
+  // Loading the neural network configuration from a JSON file and running it
+  fs.readFile("fixing_layered_network_config.json", "utf8", (err, data) => {
+    if (err) {
+      console.error("Error reading file:", err);
+      return;
+    }
+
+    const networkConfig = JSON.parse(data);
+    const nn = new FIXEDLayeredNeuralNetwork(networkConfig);
 
     // Example input values - adjust based on your actual input configuration
     const inputValues = { 1: 1, 2: 0.5, 3: 0.75 };
