@@ -10,8 +10,28 @@ class FIXEDLayeredNeuralNetwork {
         return Math.max(0, input);
       case "sigmoid":
         return 1 / (1 + Math.exp(-input));
+      case "tanh":
+        return Math.tanh(input);
+      case "softmax":
+        // Softmax is typically applied across a layer of neurons, but for a single input:
+        return Math.exp(input); // Should normalize later in the layer processing
+      case "leaky_relu":
+        return input > 0 ? input : 0.01 * input;
+      case "swish":
+        return input * (1 / (1 + Math.exp(-input))); // Beta set to 1 for simplicity
+      case "elu":
+        const alpha = 1.0; // Alpha can be adjusted based on specific needs
+        return input >= 0 ? input : alpha * (Math.exp(input) - 1);
+      case "selu":
+        const lambda = 1.0507; // Scale factor
+        const alphaSELU = 1.67326; // Alpha for SELU
+        return input >= 0
+          ? lambda * input
+          : lambda * (alphaSELU * (Math.exp(input) - 1));
+      case "softplus":
+        return Math.log(1 + Math.exp(input));
       default:
-        return input;
+        return input; // Linear activation (no change)
     }
   }
 
