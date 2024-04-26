@@ -8,10 +8,11 @@ const { readFileAsJson } = require("./access");
 const { ONN } = require("./ONN");
 
 const { FULLNeuralNetwork } = require("./fullFFNN");
+const { LayeredNeuralNetwork } = require("./layredfullFFNN");
 
 (async () => {
   console.log("welcome to neat template node/js to golang to compute shader");
-  simpleTestingExample();
+  /*simpleTestingExample();
   try {
     // Use the function to read a file and parse it as JSON
     const jsonObj = await readFileAsJson("network_config.json");
@@ -20,9 +21,10 @@ const { FULLNeuralNetwork } = require("./fullFFNN");
     // Handle errors that may come from reading the file or parsing JSON
     console.error("Failed to read or parse JSON:", error);
   }
-
-  testing();
-  testingfullffnnrun();
+  */
+  //testing();
+  //testingfullffnnrun();
+  testingLayeredFullFFNNrun();
 })();
 
 function testing() {
@@ -62,5 +64,24 @@ function testingfullffnnrun() {
     // Example: Set input values here as needed
     const outputs = nn.feedforward({ 1: 1, 2: 0.5, 3: 0.75 });
     console.log("Neural network outputs:", outputs);
+  });
+}
+
+function testingLayeredFullFFNNrun() {
+  console.log("==============starting LAYERED full ff nn===========");
+  // Loading the neural network configuration from a JSON file and running it
+  fs.readFile("layered_network_config.json", "utf8", (err, data) => {
+    if (err) {
+      console.error("Error reading file:", err);
+      return;
+    }
+
+    const networkConfig = JSON.parse(data);
+    const nn = new LayeredNeuralNetwork(networkConfig);
+
+    // Example input values - adjust based on your actual input configuration
+    const inputValues = { 1: 1, 2: 0.5, 3: 0.75 };
+    const outputs = nn.feedforward(inputValues);
+    console.log("Network outputs:", outputs);
   });
 }
