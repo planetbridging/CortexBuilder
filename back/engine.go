@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,6 +13,12 @@ import (
 )
 
 func main() {
+
+	testing()
+
+}
+
+func startWebServer() {
 	app := fiber.New()
 
 	app.Use(cors.New(cors.Config{
@@ -30,35 +38,6 @@ func main() {
 	})
 
 	setupRoutes(app)
-
-	// Ensure base directory and projects subdirectory exist
-	/*baseDir := "./host"
-	projectsDir := filepath.Join(baseDir, "projects")
-	ensureDir(baseDir)
-	ensureDir(projectsDir)
-
-	// API endpoint to list files and folders in the base directory
-	app.Get("/files", func(c *fiber.Ctx) error {
-		return c.JSON(listFilesInDir(baseDir))
-	})*/
-
-	// Serve React static files - adjust "build" to the path of your React build directory
-	//app.Static("/", "./front/build")
-
-	// This route handler can be removed or adjusted if you want to use React Router for routing
-	/*app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendFile("./front/build/index.html")
-	})
-
-	app.Get("/record", func(c *fiber.Ctx) error {
-		return c.SendFile("./front/build/index.html")
-	})
-
-	app.Get("/preprocessing", func(c *fiber.Ctx) error {
-		return c.SendFile("./front/build/index.html")
-	})*/
-
-	//setupRoutes(app)
 
 	go func() {
 		if err := app.Listen(":4123"); err != nil {
@@ -80,14 +59,27 @@ func main() {
 }
 
 func testing() {
-	network, err := NewNetworkFromFile("network_config.json")
+	// Load the neural network configuration from a JSON file
+	jsonData, err := ioutil.ReadFile("fixing_layered_network_config.json")
 	if err != nil {
-		fmt.Println("Error creating network:", err)
+		fmt.Println("Error reading file:", err)
 		return
 	}
 
-	// Example multidimensional integer input
-	input := [][]int{{1, 2}, {3, 4}}
-	output := network.Forward(input)
-	fmt.Println("Network output:", output)
+	var networkConfig NetworkConfig
+	err = json.Unmarshal(jsonData, &networkConfig)
+	if err != nil {
+		fmt.Println("Error unmarshaling JSON:", err)
+		return
+	}
+
+	// Example input values - adjust based on your actual input configuration
+	inputValues := map[string]float64{
+		"1": 1,
+		"2": 0.5,
+		"3": 0.75,
+	}
+
+	outputs := feedforward(&networkConfig, inputValues)
+	fmt.Println("Network outputs:", outputs)
 }

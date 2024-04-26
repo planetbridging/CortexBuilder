@@ -1,122 +1,98 @@
 package main
 
 import (
-	"encoding/json"
 	"math"
-	"strconv"
 )
 
-type Neuron struct {
-	ID             int
-	Incoming       []Connection
-	Bias           float64
-	ActivationType string
-	Output         float64
-	IsInput        bool
-	IsOutput       bool
-}
-
 type Connection struct {
-	Weight float64
-	From   *Neuron
+	Weight float64 `json:"weight"`
 }
 
-type NeuralNetwork struct {
-	Neurons       map[int]*Neuron
-	InputNeurons  []*Neuron
-	OutputNeurons []*Neuron
+type Neuron struct {
+	ActivationType string                `json:"activationType"`
+	Connections    map[string]Connection `json:"connections"`
+	Bias           float64               `json:"bias"`
 }
 
-func NewNetworkFromJSON(jsonData []byte) (NeuralNetwork, error) {
-	var config struct {
-		Neurons map[string]struct {
-			Bias           float64            `json:"bias"`
-			ActivationType string             `json:"activationType"`
-			Connections    map[string]float64 `json:"connections"`
-			IsInput        bool               `json:"isInput"`
-			IsOutput       bool               `json:"isOutput"`
-		} `json:"neurons"`
-	}
-
-	err := json.Unmarshal(jsonData, &config)
-	if err != nil {
-		return NeuralNetwork{}, err
-	}
-
-	network := NeuralNetwork{Neurons: make(map[int]*Neuron)}
-	for id, neuronConfig := range config.Neurons {
-		neuronID, _ := strconv.Atoi(id)
-		neuron := &Neuron{
-			ID:             neuronID,
-			Bias:           neuronConfig.Bias,
-			ActivationType: neuronConfig.ActivationType,
-			Incoming:       []Connection{},
-			IsInput:        neuronConfig.IsInput,
-			IsOutput:       neuronConfig.IsOutput,
-		}
-		network.Neurons[neuronID] = neuron
-		if neuron.IsInput {
-			network.InputNeurons = append(network.InputNeurons, neuron)
-		}
-		if neuron.IsOutput {
-			network.OutputNeurons = append(network.OutputNeurons, neuron)
-		}
-	}
-
-	for id, neuronConfig := range config.Neurons {
-		neuronID, _ := strconv.Atoi(id)
-		neuron := network.Neurons[neuronID]
-		for targetID, weight := range neuronConfig.Connections {
-			targetNeuronID, _ := strconv.Atoi(targetID)
-			targetNeuron := network.Neurons[targetNeuronID]
-			connection := Connection{Weight: weight, From: neuron}
-			targetNeuron.Incoming = append(targetNeuron.Incoming, connection)
-		}
-	}
-
-	return network, nil
+type Layer struct {
+	Neurons map[string]Neuron `json:"neurons"`
 }
 
-func (nn *NeuralNetwork) Forward(input [][]int) [][]float64 {
-	// Set input neuron outputs
-	for i, row := range input {
-		for j, value := range row {
-			index := i*len(row) + j
-			if index < len(nn.InputNeurons) {
-				nn.InputNeurons[index].Output = float64(value)
-			}
-		}
-	}
-
-	// Compute output for all neurons
-	for _, neuron := range nn.Neurons {
-		if !neuron.IsInput { // Skip input neurons since they are set directly
-			sum := neuron.Bias
-			for _, connection := range neuron.Incoming {
-				sum += connection.From.Output * connection.Weight
-			}
-			neuron.Output = activate(sum, neuron.ActivationType)
-		}
-	}
-
-	// Collect outputs
-	output := make([][]float64, len(nn.OutputNeurons))
-	for i, neuron := range nn.OutputNeurons {
-		output[i] = []float64{neuron.Output} // Modify as needed to match your specific output structure
-	}
-	return output
+type NetworkConfig struct {
+	Layers struct {
+		Input  Layer   `json:"input"`
+		Hidden []Layer `json:"hidden"`
+		Output Layer   `json:"output"`
+	} `json:"layers"`
 }
 
-func activate(x float64, activationType string) float64 {
+func activate(activationType string, input float64) float64 {
 	switch activationType {
-	case "sigmoid":
-		return 1 / (1 + math.Exp(-x))
 	case "relu":
-		if x > 0 {
-			return x
+		return math.Max(0, input)
+	case "sigmoid":
+		return 1 / (1 + math.Exp(-input))
+	case "tanh":
+		return math.Tanh(input)
+	case "softmax":
+		return math.Exp(input) // Should normalize later in the layer processing
+	case "leaky_relu":
+		if input > 0 {
+			return input
 		}
-		return 0
+		return 0.01 * input
+	case "swish":
+		return input * (1 / (1 + math.Exp(-input))) // Beta set to 1 for simplicity
+	case "elu":
+		alpha := 1.0 // Alpha can be adjusted based on specific needs
+		if input >= 0 {
+			return input
+		}
+		return alpha * (math.Exp(input) - 1)
+	case "selu":
+		lambda := 1.0507    // Scale factor
+		alphaSELU := 1.6733 // Alpha for SELU
+		if input >= 0 {
+			return lambda * input
+		}
+		return lambda * (alphaSELU * (math.Exp(input) - 1))
+	case "softplus":
+		return math.Log(1 + math.Exp(input))
 	default:
-		return x // Linear activation by default
+		return input // Linear activation (no change)
 	}
+}
+
+func feedforward(config *NetworkConfig, inputValues map[string]float64) map[string]float64 {
+	neurons := make(map[string]float64)
+
+	// Initialize input layer neurons with input values
+	for inputID := range config.Layers.Input.Neurons {
+		neurons[inputID] = inputValues[inputID]
+	}
+
+	// Process hidden layers
+	for _, layer := range config.Layers.Hidden {
+		for nodeID, node := range layer.Neurons {
+			sum := 0.0
+			for inputID, connection := range node.Connections {
+				sum += neurons[inputID] * connection.Weight
+			}
+			sum += node.Bias
+			neurons[nodeID] = activate(node.ActivationType, sum)
+		}
+	}
+
+	// Process output layer
+	outputs := make(map[string]float64)
+	for nodeID, node := range config.Layers.Output.Neurons {
+		sum := 0.0
+		for inputID, connection := range node.Connections {
+			sum += neurons[inputID] * connection.Weight
+		}
+		sum += node.Bias
+		outputs[nodeID] = activate(node.ActivationType, sum)
+	}
+
+	return outputs
 }

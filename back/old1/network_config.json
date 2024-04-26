@@ -1,0 +1,43 @@
+{
+    "neurons": {
+        "1": {
+            "isInput": true,
+            "activationType": "relu",
+            "connections": {
+                "4": 0.5
+            }
+        },
+        "2": {
+            "isInput": true,
+            "activationType": "sigmoid",
+            "connections": {
+                "4": 0.4,
+                "5": -0.2
+            }
+        },
+        "3": {
+            "isInput": true,
+            "activationType": "relu",
+            "connections": {
+                "5": 0.3
+            }
+        },
+        "4": {
+            "activationType": "sigmoid",
+            "connections": {
+                "6": -0.3
+            }
+        },
+        "5": {
+            "activationType": "sigmoid",
+            "connections": {
+                "6": 0.8
+            }
+        },
+        "6": {
+            "isOutput": true,
+            "activationType": "sigmoid",
+            "connections": {}
+        }
+    }
+}
