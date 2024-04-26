@@ -1,8 +1,13 @@
+// Load the required modules
+const fs = require("fs");
+
 // Import the custom module you created
 const { NeuralNetwork } = require("./simpleNN_json");
 
 const { readFileAsJson } = require("./access");
 const { ONN } = require("./ONN");
+
+const { FULLNeuralNetwork } = require("./fullFFNN");
 
 (async () => {
   console.log("welcome to neat template node/js to golang to compute shader");
@@ -17,6 +22,7 @@ const { ONN } = require("./ONN");
   }
 
   testing();
+  testingfullffnnrun();
 })();
 
 function testing() {
@@ -39,4 +45,22 @@ function simpleTestingExample() {
   // Example input
   const input = [1, 0];
   console.log("Output:", nn.feedforward(input));
+}
+
+function testingfullffnnrun() {
+  console.log("==============starting full ff nn===========");
+  // Load the neural network configuration and run it
+  fs.readFile("network_config.json", (err, data) => {
+    if (err) {
+      console.error("Error reading file:", err);
+      return;
+    }
+    const config = JSON.parse(data);
+    console.log(config);
+    const nn = new FULLNeuralNetwork(config);
+
+    // Example: Set input values here as needed
+    const outputs = nn.feedforward({ 1: 1, 2: 0.5, 3: 0.75 });
+    console.log("Neural network outputs:", outputs);
+  });
 }
