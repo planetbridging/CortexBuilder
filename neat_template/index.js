@@ -12,6 +12,8 @@ const { LayeredNeuralNetwork } = require("./layredfullFFNN");
 
 const { FIXEDLayeredNeuralNetwork } = require("./FixedLayeredNN");
 
+const { startHosting } = require("./hosting");
+
 (async () => {
   console.log("welcome to neat template node/js to golang to compute shader");
   /*simpleTestingExample();
@@ -28,6 +30,8 @@ const { FIXEDLayeredNeuralNetwork } = require("./FixedLayeredNN");
   //testingfullffnnrun();
   //testingLayeredFullFFNNrun();
   fixedtestingLayeredFullFFNNrun();
+
+  startHosting();
 })();
 
 function testing() {
