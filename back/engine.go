@@ -14,8 +14,8 @@ import (
 
 func main() {
 
-	testing()
-
+	//testing()
+	startWebServer()
 }
 
 func startWebServer() {

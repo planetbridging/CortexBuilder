@@ -4,6 +4,8 @@ const bodyParser = require("body-parser");
 const { MongoClient, ObjectId } = require("mongodb");
 const cors = require("cors");
 
+var blockedList = ["local", "config", "admin"];
+
 function startHosting() {
   const app = express();
   const port = 1789;
@@ -65,7 +67,14 @@ function startHosting() {
     try {
       await client.connect();
       const databasesList = await client.db().admin().listDatabases();
-      res.status(200).json(databasesList.databases);
+      var lst = [];
+      for (var i in databasesList.databases) {
+        if (!blockedList.includes(databasesList.databases[i].name)) {
+          lst.push(databasesList.databases[i]);
+        }
+      }
+
+      res.status(200).json(lst);
     } catch (error) {
       console.error("Error retrieving databases:", error);
       res.status(500).json({ message: "Failed to retrieve databases" });
