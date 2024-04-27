@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 
 function startHosting() {
   const app = express();
@@ -33,26 +33,27 @@ function startHosting() {
   });
 
   app.get("/getModel", async (req, res) => {
-    const dbName = req.query.dbName;
-    const collectionName = req.query.collectionName;
-    const modelId = req.query.modelId; // Assuming you are using _id as a unique identifier
+    const { dbName, collectionName, modelId } = req.query;
+    if (!dbName || !collectionName || !modelId) {
+      return res.status(400).json({
+        message: "Database name, collection name, and model ID are required",
+      });
+    }
 
     try {
       await client.connect();
       const db = client.db(dbName);
       const collection = db.collection(collectionName);
-      const model = await collection.findOne({
-        _id: new MongoClient.ObjectID(modelId),
-      });
+      const model = await collection.findOne({ _id: new ObjectId(modelId) });
 
       if (model) {
-        res.status(200).send(model);
+        res.status(200).json(model);
       } else {
-        res.status(404).send({ message: "Model not found" });
+        res.status(404).json({ message: "Model not found" });
       }
     } catch (error) {
       console.error("Error retrieving model:", error);
-      res.status(500).send({ message: "Failed to retrieve the model" });
+      res.status(500).json({ message: "Failed to retrieve the model" });
     } finally {
       await client.close();
     }
