@@ -33,10 +33,11 @@ NEAT is a sophisticated type of TWEANN (Topology and Weight Evolving Artificial 
 - **Bias Mutation**: Adjusts the biases of neurons to fine-tune the activation potential, enhancing the network's ability to fit complex patterns.
 - **Add Node Mutation**: Inserts a new node by splitting an existing connection, increasing the network’s depth and potential for complexity.
 - **Add Connection Mutation**: Creates a new connection between previously unconnected nodes, expanding the network’s capacity for diverse interactions.
-- **Connection Enable/Disable**: Toggles the enabled state of connections, allowing the network to experiment with different neural pathways without permanent structural changes.
+- **Connection Enable/Disable**: Toggles the enabled state of connections, allowing the network to experiment with different neural pathways without permanent structural changes.(Will be developed later)
 - **Add Layer Mutation**: Introduces entirely new layers to the network, significantly enhancing its depth and functional complexity.
 - **Activation Function Mutation**: Alters the activation function of nodes to better suit different types of data processing needs, adapting to the specific characteristics of the input data.
 - **Node Type Mutation**: Switches node types (e.g., from standard neurons to LSTM units or attention mechanisms), enabling the network to handle temporal dynamics or focus on relevant input features effectively.
+  (Will be developed later)
 
 ### 7. **Speciation**
 
