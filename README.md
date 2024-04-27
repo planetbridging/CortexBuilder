@@ -66,3 +66,100 @@ Will be adding the disabled node and node type later on because of the complexit
 ## Conclusion
 
 Building a NEAT implementation requires a deep understanding of both evolutionary algorithms and neural network principles. With tools such as NEAT-Python, developers can create robust solutions tailored to complex problem-solving scenarios. This framework emphasizes the importance of generalization through holdout validation, ensuring that evolved networks perform well on unseen data.
+
+**What a feedforward neural network with multiple activation functions can do:**
+(This is what is currently aiming for then working on more advanced)
+
+1. Image Classification
+2. Object Detection
+3. Image Segmentation
+4. Zero-Shot Image Classification
+5. Text Classification
+6. Token Classification
+7. Table Question Answering
+8. Question Answering
+9. Zero-Shot Classification
+10. Feature Extraction (Image and Text)
+11. Tabular Classification
+12. Tabular Regression
+
+**What a feedforward neural network with multiple activation functions cannot do:**
+
+1. Image-Text-to-Text
+2. Visual Question Answering
+3. Document Question Answering
+4. Depth Estimation
+5. Text-to-Image
+6. Image-to-Text
+7. Image-to-Image
+8. Image-to-Video
+9. Unconditional Image Generation
+10. Video Classification
+11. Text-to-Video
+12. Mask Generation
+13. Zero-Shot Object Detection
+14. Text-to-3D
+15. Image-to-3D
+16. Translation
+17. Summarization
+18. Text Generation
+19. Text2Text Generation
+20. Fill-Mask
+21. Sentence Similarity
+22. Text-to-Speech
+23. Text-to-Audio
+24. Automatic Speech Recognition
+25. Audio-to-Audio
+26. Audio Classification
+27. Voice Activity Detection
+28. Reinforcement Learning
+29. Robotics
+30. Graph Machine Learning
+
+**What a feedforward neural network with self-attention can do:**
+
+1. Image Classification
+2. Object Detection
+3. Image Segmentation
+4. Zero-Shot Image Classification
+5. Text Classification
+6. Token Classification
+7. Table Question Answering
+8. Question Answering
+9. Zero-Shot Classification
+10. Feature Extraction (Image and Text)
+11. Tabular Classification
+12. Tabular Regression
+13. Translation
+14. Summarization
+15. Text Generation
+16. Text2Text Generation
+17. Fill-Mask
+18. Sentence Similarity
+
+**What a feedforward neural network with self-attention cannot do:**
+
+1. Image-Text-to-Text
+2. Visual Question Answering
+3. Document Question Answering
+4. Depth Estimation
+5. Text-to-Image
+6. Image-to-Text
+7. Image-to-Image
+8. Image-to-Video
+9. Unconditional Image Generation
+10. Video Classification
+11. Text-to-Video
+12. Mask Generation
+13. Zero-Shot Object Detection
+14. Text-to-3D
+15. Image-to-3D
+16. Text-to-Speech
+17. Text-to-Audio
+18. Automatic Speech Recognition
+19. Audio-to-Audio
+20. Audio Classification
+21. Voice Activity Detection
+22. Reinforcement Learning
+23. Robotics
+24. Graph Machine Learning
