@@ -39,6 +39,8 @@ NEAT is a sophisticated type of TWEANN (Topology and Weight Evolving Artificial 
 - **Node Type Mutation**: Switches node types (e.g., from standard neurons to LSTM units or attention mechanisms), enabling the network to handle temporal dynamics or focus on relevant input features effectively.
   (Will be developed later)
 
+Will be adding the disabled node and node type later on because of the complexity and need to get to a working status first.
+
 ### 7. **Speciation**
 
 - Groups similar topologies into species to protect innovation and ensure that new structures are not immediately outcompeted.
