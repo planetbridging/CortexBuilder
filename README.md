@@ -67,6 +67,22 @@ Will be adding the disabled node and node type later on because of the complexit
 
 Building a NEAT implementation requires a deep understanding of both evolutionary algorithms and neural network principles. With tools such as NEAT-Python, developers can create robust solutions tailored to complex problem-solving scenarios. This framework emphasizes the importance of generalization through holdout validation, ensuring that evolved networks perform well on unseen data.
 
+## Future development nodes that wll be added
+
+Additional Node Types
+
+Convolutional Nodes: Introduce new node types that perform convolution operations, enabling the network to process image data or data with a grid-like structure by effectively capturing local patterns and spatial relationships.
+Pooling Nodes: Implement max pooling and average pooling nodes to downsample feature maps and introduce translation invariance, often used in conjunction with convolutional nodes.
+Normalization Nodes: Incorporate batch normalization or layer normalization nodes to stabilize the training process and improve network performance by normalizing inputs to subsequent layers.
+Dropout Nodes: Add dropout nodes to randomly drop out (set to zero) a fraction of activations during training, acting as a regularization technique to prevent overfitting.
+Residual Connections: Enable the creation of residual connections or skip connections, allowing the input of a node to be added to its output, mitigating the vanishing gradient problem and improving the training of deeper networks.
+Embedding Nodes: Introduce embedding nodes to map discrete input data (e.g., text or categorical features) to dense vector representations.
+Attention Nodes: Explore the addition of attention mechanisms, such as self-attention or multi-head attention, by introducing attention nodes to capture long-range dependencies, particularly useful for sequential data.
+Recurrent Nodes: Implement recurrent nodes like Long Short-Term Memory (LSTM) or Gated Recurrent Units (GRU) to enable the network to model and process sequential information effectively for tasks involving sequential data.
+Capsule Nodes: Investigate the incorporation of capsule nodes, a more recent development in neural network architectures, to better model spatial relationships and hierarchical representations in the data for certain types of tasks.
+
+By introducing these additional node types and architectural enhancements, the FIXEDLayeredNeuralNetwork class could be extended to handle a broader range of tasks, including image processing, natural language processing, and sequential data modeling, among others. However, implementing these enhancements may require significant modifications to the existing codebase, network configuration, and potentially the training process.
+
 **What a feedforward neural network with multiple activation functions can do:**
 (This is what is currently aiming for then working on more advanced)
 
