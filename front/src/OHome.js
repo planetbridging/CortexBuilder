@@ -17,7 +17,7 @@ import {
   FiEye,
 } from "react-icons/fi";
 
-import { FaFolder } from "react-icons/fa";
+import { FaFolder, FaEye } from "react-icons/fa";
 
 import { FaHome } from "react-icons/fa";
 
@@ -29,6 +29,7 @@ import {
   useParams,
 } from "react-router-dom";
 import OFileBrowser from "./OFileBrowser";
+import OModelViewer from "./OModelViewer";
 
 class OHome extends Component {
   state = {
@@ -42,60 +43,6 @@ class OHome extends Component {
       content: prevState.isLoggedIn ? "Please log in." : "Welcome back!",
     }));
   };
-
-  /*return <Box w="100%" minH={"100vh"} bg='#4A5568'>
-      <Router>
-        <Box bg='#2D3748' w='100%' p={4} color='white'>
-          <Wrap>
-            <WrapItem>
-              <Image src={logo} alt="Logo" boxSize="50px" objectFit="cover" />
-            </WrapItem>
-            <WrapItem>
-              <Stack>
-                <Text fontSize='md'>GOPP</Text>
-                <Text fontSize='xs'>Golang packet processing</Text>
-              </Stack>
-            </WrapItem>
-            <WrapItem p="5">
-              <Wrap>
-                <WrapItem>
-                  <RLink to="/"><Button>Home</Button></RLink>
-                </WrapItem>
-                <WrapItem>
-                  {btnRecord}
-                </WrapItem>
-                <WrapItem>
-                  
-                </WrapItem>
-              </Wrap>
-            </WrapItem>
-          </Wrap>
-        </Box>
-
-
-        <Switch>
-          <Route exact path="/">
-            {showTrafficListener}
-          </Route>
-
-          <Route exact path="/record">
-            <RecordTraffic wsUrl={wsUrl} />
-          </Route>
-
-          <Route exact path="/preprocessing">
-            <DataPreparation wsUrl={wsUrl} />
-          </Route>
-
-
-          <Route exact path="/predict">
-            <DeployListener wsUrl={wsUrl} />
-          </Route>
-          
-
-        </Switch>
-      </Router>
-    </Box>
-  }*/
 
   render() {
     return (
@@ -136,11 +83,13 @@ class OHome extends Component {
                 </RLink>
               </WrapItem>
               <WrapItem>
-                <Box p={2} bg="white" boxShadow="sm" borderRadius="md">
-                  <Text mt={2}>
-                    <Icon as={FiEye} /> Model Viewer
-                  </Text>
-                </Box>
+                <RLink to="/modelviewer">
+                  <Box p={2} bg="white" boxShadow="sm" borderRadius="md">
+                    <Text mt={2}>
+                      <Icon as={FaEye} /> Model Viewer
+                    </Text>
+                  </Box>
+                </RLink>
               </WrapItem>
               <WrapItem>
                 <Box p={2} bg="white" boxShadow="sm" borderRadius="md">
@@ -183,6 +132,9 @@ class OHome extends Component {
               </Route>
               <Route exact path="/files">
                 <OFileBrowser />
+              </Route>
+              <Route exact path="/modelviewer">
+                <OModelViewer />
               </Route>
             </Switch>
           </Box>

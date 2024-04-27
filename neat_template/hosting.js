@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const { MongoClient, ObjectId } = require("mongodb");
+const cors = require("cors");
 
 function startHosting() {
   const app = express();
@@ -12,6 +13,7 @@ function startHosting() {
     useUnifiedTopology: true,
   });
 
+  app.use(cors()); // Enable CORS for all routes and origins
   app.use(bodyParser.json());
 
   app.post("/saveModel", async (req, res) => {
