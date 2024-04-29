@@ -5,6 +5,8 @@ import { FullFileBrowser, setChonkyDefaults } from "chonky";
 import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import { defineFileAction, ChonkyIconName } from "chonky";
 
+import { OFFNN } from "./OFFNN";
+
 setChonkyDefaults({ iconComponent: ChonkyIconFA });
 
 const hostIP = "localhost";
@@ -86,6 +88,13 @@ class OModelViewer extends React.Component {
       )
       .then((response) => {
         console.log("Model data:", response.data);
+        console.log("--------running model testing-------");
+        const nn = new OFFNN(response.data);
+
+        // Example input values - adjust based on your actual input configuration
+        const inputValues = { 1: 1, 2: 0.5, 3: 0.75 };
+        const outputs = nn.feedforward(inputValues);
+        console.log("Network outputs:", outputs);
       })
       .catch((error) => console.error("Error fetching model:", error));
   };
@@ -96,23 +105,24 @@ class OModelViewer extends React.Component {
     const selectedFile = state.selectedFiles[0];
     //console.log("Selected file:", selectedFile);
 
-    if (action.id === "open_folder" && selectedFile && selectedFile.isDir) {
+    if (action.id === "open_folder" && selectedFile) {
       const { id, name } = selectedFile;
       const { currentPath } = this.state;
 
-      if (currentPath === "root") {
-        this.listCollections(name);
+      if (selectedFile.isDir) {
+        if (currentPath === "root") {
+          this.listCollections(name);
+        } else {
+          const pathParts = currentPath.split("/");
+          if (pathParts.length === 1) {
+            this.listModels(pathParts[0], name);
+          }
+        }
       } else {
         const pathParts = currentPath.split("/");
-        console.log(pathParts.length);
-        if (pathParts.length === 1) {
-          this.listModels(pathParts[0], name);
+        if (pathParts.length === 2) {
+          this.getModel(pathParts[0], pathParts[1], id);
         }
-
-        /*else if (pathParts.length === 2) {
-          console.log("hello");
-          //this.getModel(pathParts[0], pathParts[1], id);
-        }*/
       }
     }
   };
