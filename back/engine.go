@@ -7,14 +7,18 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func main() {
-
-	//testing()
+	start := time.Now() // Start timing
+	testing()
+	duration := time.Since(start)                                  // Calculate duration
+	fmt.Printf("Execution time: %v ms\n", duration.Milliseconds()) // Print time in milliseconds
+	fmt.Printf("Execution time: %v s\n", duration.Seconds())       // Print time in seconds
 	startWebServer()
 }
 

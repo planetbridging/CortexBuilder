@@ -29,7 +29,16 @@ const { startHosting } = require("./hosting");
   //testing();
   //testingfullffnnrun();
   //testingLayeredFullFFNNrun();
-  fixedtestingLayeredFullFFNNrun();
+
+  const start = process.hrtime.bigint(); // Start timing
+  await fixedtestingLayeredFullFFNNrun();
+  const end = process.hrtime.bigint(); // End timing
+  const timeInNanoseconds = end - start;
+  const timeInMilliseconds = Number(timeInNanoseconds) / 1e6; // Convert nanoseconds to milliseconds
+  const timeInSeconds = Number(timeInNanoseconds) / 1e9; // Convert nanoseconds to seconds
+
+  console.log(`Execution time: ${timeInMilliseconds} ms`);
+  console.log(`Execution time: ${timeInSeconds} s`);
 
   startHosting();
 })();
@@ -92,16 +101,12 @@ function testingLayeredFullFFNNrun() {
     console.log("Network outputs:", outputs);
   });
 }
-
-function fixedtestingLayeredFullFFNNrun() {
+async function fixedtestingLayeredFullFFNNrun() {
   console.log("==============starting LAYERED full ff nn===========");
-  // Loading the neural network configuration from a JSON file and running it
-  fs.readFile("fixing_layered_network_config.json", "utf8", (err, data) => {
-    if (err) {
-      console.error("Error reading file:", err);
-      return;
-    }
 
+  try {
+    // Reading the JSON configuration file
+    const data = await fs.readFileSync("fixing_layered_network_config.json");
     const networkConfig = JSON.parse(data);
     const nn = new FIXEDLayeredNeuralNetwork(networkConfig);
 
@@ -109,5 +114,7 @@ function fixedtestingLayeredFullFFNNrun() {
     const inputValues = { 1: 1, 2: 0.5, 3: 0.75 };
     const outputs = nn.feedforward(inputValues);
     console.log("Network outputs:", outputs);
-  });
+  } catch (err) {
+    console.error("Error reading file:", err);
+  }
 }

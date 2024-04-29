@@ -4,6 +4,40 @@ ENAS is an ambitious project that aims to develop an extensible and versatile im
 
 The name "Extensible Neuroevolutionary Architecture Search" (ENAS) better captures the comprehensive nature of this project, as it goes beyond traditional Topology and Weight Evolving Artificial Neural Network (TWEANN) implementations. By emphasizing the extensibility, neuroevolutionary principles, and architecture search capabilities, the name reflects the project's ambitious goals and differentiates it from more limited approaches.
 
+![Project Overview Diagram](diagram.png)
+
+## Project Description
+
+The ENAS project is designed to develop a flexible and scalable system for evolving neural networks using advanced neuroevolutionary algorithms. This system automatically discovers and optimizes neural architectures, running across multiple platforms to handle computational tasks efficiently and providing an interactive interface for users.
+
+## System Architecture
+
+### Components
+
+1. **React Front-End**:
+
+   - Initiates API requests to the Golang and Node.js APIs.
+   - Runs AI models and displays the results.
+
+2. **Golang and Node.js APIs**:
+
+   - Handle JSON data extraction from respective sources: Golang File System and MongoDB.
+   - The Golang API accesses local hosted files, while the Node.js API interacts with MongoDB to retrieve model files.
+
+3. **Backend**:
+
+   - Houses the core functionalities of ENAS developed in both Golang and Node.js.
+   - Acts as the computational backbone where the main evolutionary algorithms operate.
+
+4. **AI Models**:
+
+   - Designed to run within the React front-end, Golang, and Node.js environments.
+   - Future implementations will enable these models to run in a compute shader within Godot 4, leveraging GPU acceleration.
+
+5. **Fitness Evaluation and Future Development**:
+   - Includes evaluating the fitness of neural architectures and guiding their evolution based on performance metrics.
+   - Future development plans include the addition of new node types and capabilities.
+
 ## Key Components and Concepts
 
 ### 1. **Genome Representation**
