@@ -17,7 +17,7 @@ import {
   FiEye,
 } from "react-icons/fi";
 
-import { FaFolder, FaEye } from "react-icons/fa";
+import { FaFolder, FaEye, FaBookOpen } from "react-icons/fa";
 
 import { FaHome } from "react-icons/fa";
 
@@ -30,6 +30,7 @@ import {
 } from "react-router-dom";
 import OFileBrowser from "./OFileBrowser";
 import OModelViewer from "./OModelViewer";
+import OTraining from "./OTraining";
 
 class OHome extends Component {
   state = {
@@ -91,12 +92,15 @@ class OHome extends Component {
                   </Box>
                 </RLink>
               </WrapItem>
+
               <WrapItem>
-                <Box p={2} bg="white" boxShadow="sm" borderRadius="md">
-                  <Text mt={2}>
-                    <Icon as={FiBookOpen} /> Training
-                  </Text>
-                </Box>
+                <RLink to="/training">
+                  <Box p={2} bg="white" boxShadow="sm" borderRadius="md">
+                    <Text mt={2}>
+                      <Icon as={FaBookOpen} /> Training
+                    </Text>
+                  </Box>
+                </RLink>
               </WrapItem>
               <WrapItem>
                 <Box p={2} bg="white" boxShadow="sm" borderRadius="md">
@@ -135,6 +139,9 @@ class OHome extends Component {
               </Route>
               <Route exact path="/modelviewer">
                 <OModelViewer />
+              </Route>
+              <Route exact path="/training">
+                <OTraining />
               </Route>
             </Switch>
           </Box>
