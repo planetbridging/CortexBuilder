@@ -29,7 +29,6 @@ import {
   useParams,
 } from "react-router-dom";
 import OFileBrowser from "./OFileBrowser";
-import OModelViewer from "./OModelViewer";
 import OTraining from "./OTraining";
 
 class OHome extends Component {
@@ -83,15 +82,6 @@ class OHome extends Component {
                   </Box>
                 </RLink>
               </WrapItem>
-              <WrapItem>
-                <RLink to="/modelviewer">
-                  <Box p={2} bg="white" boxShadow="sm" borderRadius="md">
-                    <Text mt={2}>
-                      <Icon as={FaEye} /> Model Viewer
-                    </Text>
-                  </Box>
-                </RLink>
-              </WrapItem>
 
               <WrapItem>
                 <RLink to="/training">
@@ -137,11 +127,9 @@ class OHome extends Component {
               <Route exact path="/files">
                 <OFileBrowser />
               </Route>
-              <Route exact path="/modelviewer">
-                <OModelViewer />
-              </Route>
+
               <Route exact path="/training">
-                <OTraining />
+                <OTraining toast={this.props.toast} />
               </Route>
             </Switch>
           </Box>

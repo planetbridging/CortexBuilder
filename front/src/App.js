@@ -1,12 +1,13 @@
-import logo from './logo.svg';
-import './App.css';
+import logo from "./logo.svg";
+import "./App.css";
 
-import OHome from './OHome';
+import { useToast } from "@chakra-ui/react";
+
+import OHome from "./OHome";
 
 function App() {
-  return (
-    <OHome/>
-  );
+  const toast = useToast();
+  return <OHome toast={toast} />;
 }
 
 export default App;
