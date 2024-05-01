@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -45,6 +48,36 @@ func setupRoutes(app *fiber.App) {
 		}
 
 		fmt.Printf("Received initialization request: %+v\n", request)
+
+		// Generate a random model
+		//randomModel := randomizeNetworkStaticTesting()
+		//fmt.Println("Generated Model:", randomModel)
+
+		for i := 0; i < request.SpawnCount; i++ {
+			model := randomizeNetworkStaticTesting()
+
+			// Prepare payload to send to /saveModel
+			payload := map[string]interface{}{
+				"dbName":         request.AdditionalParam1,
+				"collectionName": request.AdditionalParam2,
+				"model":          json.RawMessage(model),
+			}
+
+			payloadBytes, err := json.Marshal(payload)
+			if err != nil {
+				fmt.Println("Error marshaling model:", err)
+				continue
+			}
+
+			resp, err := http.Post("http://localhost:1789/saveModel", "application/json", bytes.NewBuffer(payloadBytes))
+			if err != nil {
+				fmt.Println("Failed to send model:", err)
+				continue // Optionally handle this error more gracefully
+			}
+
+			fmt.Printf("Model sent, response status: %d\n", resp.StatusCode)
+			resp.Body.Close() // Don't forget to close the response body
+		}
 
 		// Here, you would add your logic to handle the training initialization
 		// For example, setting up configurations, preparing datasets, etc.

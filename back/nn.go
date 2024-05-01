@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"math"
+	"math/rand"
+	"time"
 )
 
 type Connection struct {
@@ -95,4 +98,105 @@ func feedforward(config *NetworkConfig, inputValues map[string]float64) map[stri
 	}
 
 	return outputs
+}
+
+func randomizeModelOnlyLayer() string {
+	rand.Seed(time.Now().UnixNano())
+	activationTypes := []string{"relu", "sigmoid", "tanh", "softmax", "leaky_relu", "swish", "elu", "selu", "softplus"}
+	activationType := activationTypes[rand.Intn(len(activationTypes))]
+
+	// Randomize weights and bias for a single neuron
+	weight1 := rand.NormFloat64() // Random weight from a normal distribution
+	bias := rand.NormFloat64()
+
+	// Constructing a JSON model with the randomized parameters
+	model := map[string]interface{}{
+		"layers": map[string]interface{}{
+			"hidden": []map[string]interface{}{
+				{
+					"neurons": map[string]interface{}{
+						"4": map[string]interface{}{
+							"activationType": activationType,
+							"connections": map[string]interface{}{
+								"1": map[string]interface{}{
+									"weight": weight1,
+								},
+							},
+							"bias": bias,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	modelJSON, _ := json.Marshal(model)
+	return string(modelJSON)
+}
+
+func randomWeight() float64 {
+	return rand.NormFloat64() // Generate a Gaussian distribution random weight
+}
+
+func randomizeNetworkStaticTesting() string {
+	model := map[string]interface{}{
+		"layers": map[string]interface{}{
+			"input": map[string]interface{}{
+				"neurons": map[string]interface{}{
+					"1": map[string]interface{}{},
+					"2": map[string]interface{}{},
+					"3": map[string]interface{}{},
+				},
+			},
+			"hidden": []map[string]interface{}{
+				{
+					"neurons": map[string]interface{}{
+						"4": map[string]interface{}{
+							"activationType": "relu",
+							"connections": map[string]interface{}{
+								"1": map[string]interface{}{
+									"weight": randomWeight(),
+								},
+							},
+							"bias": rand.Float64(), // Random bias between 0 and 1
+						},
+					},
+				},
+			},
+			"output": map[string]interface{}{
+				"neurons": map[string]interface{}{
+					"5": map[string]interface{}{
+						"activationType": "sigmoid",
+						"connections": map[string]interface{}{
+							"4": map[string]interface{}{
+								"weight": randomWeight(),
+							},
+						},
+						"bias": rand.Float64(),
+					},
+					"6": map[string]interface{}{
+						"activationType": "sigmoid",
+						"connections": map[string]interface{}{
+							"4": map[string]interface{}{
+								"weight": randomWeight(),
+							},
+						},
+						"bias": rand.Float64(),
+					},
+					"7": map[string]interface{}{
+						"activationType": "sigmoid",
+						"connections": map[string]interface{}{
+							"4": map[string]interface{}{
+								"weight": randomWeight(),
+							},
+						},
+						"bias": rand.Float64(),
+					},
+				},
+			},
+		},
+	}
+
+	modelJSON, _ := json.MarshalIndent(model, "", "  ")
+	return string(modelJSON)
 }

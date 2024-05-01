@@ -1,82 +1,82 @@
 {
-    "layers": {
-        "input": {
-            "neurons": {
-                "1": {},
-                "2": {},
-                "3": {}
-            }
-        },
-        "hidden": [
-            {
-                "neurons": {
-                    "4": {
-                        "activationType": "sigmoid",
-                        "connections": {
-                            "1": {
-                                "weight": 0.45
-                            },
-                            "2": {
-                                "weight": -0.76
-                            }
-                        },
-                        "bias": 0.1
-                    },
-                    "5": {
-                        "activationType": "sigmoid",
-                        "connections": {
-                            "2": {
-                                "weight": 0.21
-                            },
-                            "3": {
-                                "weight": 0.88
-                            }
-                        },
-                        "bias": -0.05
-                    }
-                }
+  "layers": {
+    "input": {
+      "neurons": {
+        "1": {},
+        "2": {},
+        "3": {}
+      }
+    },
+    "hidden": [
+      {
+        "neurons": {
+          "4": {
+            "activationType": "sigmoid",
+            "connections": {
+              "1": {
+                "weight": 0.45
+              },
+              "2": {
+                "weight": -0.76
+              }
             },
-            {
-                "neurons": {
-                    "7": {
-                        "activationType": "relu",
-                        "connections": {
-                            "4": {
-                                "weight": -0.34
-                            }
-                        },
-                        "bias": 0.05
-                    },
-                    "8": {
-                        "activationType": "sigmoid",
-                        "connections": {
-                            "4": {
-                                "weight": 0.30
-                            },
-                            "5": {
-                                "weight": 0.59
-                            }
-                        },
-                        "bias": -0.1
-                    }
-                }
-            }
-        ],
-        "output": {
-            "neurons": {
-                "9": {
-                    "activationType": "sigmoid",
-                    "connections": {
-                        "7": {
-                            "weight": 0.45
-                        },
-                        "8": {
-                            "weight": -0.76
-                        }
-                    },
-                    "bias": 0.2
-                }
-            }
+            "bias": 0.1
+          },
+          "5": {
+            "activationType": "sigmoid",
+            "connections": {
+              "2": {
+                "weight": 0.21
+              },
+              "3": {
+                "weight": 0.88
+              }
+            },
+            "bias": -0.05
+          }
         }
+      },
+      {
+        "neurons": {
+          "7": {
+            "activationType": "relu",
+            "connections": {
+              "4": {
+                "weight": -0.34
+              }
+            },
+            "bias": 0.05
+          },
+          "8": {
+            "activationType": "sigmoid",
+            "connections": {
+              "4": {
+                "weight": 0.3
+              },
+              "5": {
+                "weight": 0.59
+              }
+            },
+            "bias": -0.1
+          }
+        }
+      }
+    ],
+    "output": {
+      "neurons": {
+        "9": {
+          "activationType": "sigmoid",
+          "connections": {
+            "7": {
+              "weight": 0.45
+            },
+            "8": {
+              "weight": -0.76
+            }
+          },
+          "bias": 0.2
+        }
+      }
     }
+  }
 }
