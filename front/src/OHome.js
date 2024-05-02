@@ -37,6 +37,12 @@ class OHome extends Component {
     content: "Please log in.",
   };
 
+  handleDataUpdate = (dbName, collectionName) => {
+    // Do something with the received data. You can update state, etc.
+    console.log("Received dbName:", dbName);
+    console.log("Received collectionName:", collectionName);
+  }
+
   handleLoginLogout = () => {
     this.setState((prevState) => ({
       isLoggedIn: !prevState.isLoggedIn,
@@ -129,7 +135,7 @@ class OHome extends Component {
               </Route>
 
               <Route exact path="/training">
-                <OTraining toast={this.props.toast} />
+                <OTraining toast={this.props.toast} onDataUpdate={this.handleDataUpdate} />
               </Route>
             </Switch>
           </Box>

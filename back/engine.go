@@ -1,25 +1,76 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
-	"time"
+
+	"github.com/joho/godotenv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
+var (
+	Config        DBConfig
+	DBJB          *sql.DB
+	scrappingLink string
+)
+
 func main() {
-	start := time.Now() // Start timing
+	/*start := time.Now() // Start timing
 	testing()
 	duration := time.Since(start)                                  // Calculate duration
 	fmt.Printf("Execution time: %v ms\n", duration.Milliseconds()) // Print time in milliseconds
 	fmt.Printf("Execution time: %v s\n", duration.Seconds())       // Print time in seconds
+	*/
+	setupDB()
 	startWebServer()
+}
+
+func setupDB() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	fmt.Println("un", os.Getenv("dbun"))
+	Config = DBConfig{
+		Username: os.Getenv("dbun"),
+		Password: os.Getenv("dbpw"),
+		Hostname: os.Getenv("dbhost"),
+	}
+	DBJB, err = ConnectToDB(Config)
+	if err != nil {
+		log.Fatalf("Could not connect to DB: %v", err)
+	}
+
+	lstTmpDb, _ := ListDatabases(DBJB)
+	fmt.Println(lstTmpDb)
+	if strings.Contains(strings.Join(lstTmpDb, ","), "openaudata") {
+		fmt.Printf("Database '%s' exists in the list.\n")
+
+	} else {
+		fmt.Printf("Database '%s' does not exist in the list.\n")
+		CreateDatabase(DBJB, "openaudata")
+	}
+
+	_, err = DBJB.Exec("USE openaudata")
+	if err != nil {
+		log.Printf("Failed to select database: %v", err)
+		return
+	}
+
+	testdataerr := createTestTableAndData(DBJB)
+	if err != nil {
+		log.Fatalf("Failed to create and populate test table: %v", testdataerr)
+	}
+
 }
 
 func startWebServer() {

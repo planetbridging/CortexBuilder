@@ -125,6 +125,27 @@ class OModelViewer extends React.Component {
         }
       }
     }
+
+    if (action.id === "mount_population" && selectedFile) {
+      const { id, name } = selectedFile;
+      const { currentPath } = this.state;
+
+      const pathParts = currentPath.split("/");
+      const dbName = pathParts[0];
+      const collectionName = pathParts[1];
+
+
+      if(this.props.onDataUpdate){
+        this.props.onDataUpdate(dbName,collectionName);
+      }
+
+      // Log the required data
+      /*console.log(
+        `Mount Population clicked for file: ${name} (ID: ${id})`,
+        `Database: ${dbName}`,
+        `Collection: ${collectionName}`
+      );*/
+    } 
   };
 
   setupFileActions = () => {
@@ -139,7 +160,21 @@ class OModelViewer extends React.Component {
       hotkeys: ["enter"],
     });
 
-    return [openFolderAction];
+    const mountPopulationAction = defineFileAction({
+      id: "mount_population",
+      button: {
+        name: "Mount Population", // Label for the button
+        toolbar: false, // Show only in context menu
+        contextMenu: true,
+        icon: ChonkyIconName.users, // Example icon 
+      },
+      // Disable hotkey for this action
+      hotkeys: [],
+      // Check if the file is not a directory
+      shouldShow: (files) => files.length === 1 && !files[0].isDir,
+    });
+
+    return [openFolderAction,mountPopulationAction];
   };
 
   navigateUp = () => {

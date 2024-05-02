@@ -32,6 +32,11 @@ class OTraining extends Component {
     };
   }
 
+ 
+  onDataChange = (dbName,collectionName) => {
+    this.props.onDataUpdate(dbName, collectionName);
+  }
+
   handleSubmit = async (event) => {
     event.preventDefault();
     try {
@@ -83,12 +88,12 @@ class OTraining extends Component {
         <TabList>
           <Tab>Model manager</Tab>
           <Tab>Initialize</Tab>
-          <Tab>Two</Tab>
+          <Tab>Evaluation</Tab>
           <Tab>Three</Tab>
         </TabList>
         <TabPanels>
           <TabPanel>
-            <OModelViewer />
+            <OModelViewer onDataUpdate={this.onDataChange}/>
           </TabPanel>
           <TabPanel>
             <form onSubmit={this.handleSubmit}>
