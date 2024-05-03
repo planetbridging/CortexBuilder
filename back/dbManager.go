@@ -116,6 +116,36 @@ func ListDatabases(db *sql.DB) ([]string, error) {
 	return databases, nil
 }
 
+func GetTableNames(db *sql.DB, dbName string) ([]string, error) {
+	// Prepare the statement with a placeholder
+	stmt, err := db.Prepare("SHOW TABLES FROM ?")
+	if err != nil {
+		return nil, fmt.Errorf("Error preparing statement: %v", err)
+	}
+	defer stmt.Close()
+
+	// Execute the query, safely passing the dbName
+	rows, err := stmt.Query(dbName)
+	if err != nil {
+		return nil, fmt.Errorf("Error executing query: %v", err)
+	}
+	defer rows.Close()
+
+	// Log the database name for debugging
+	fmt.Println("Database name:", dbName)
+
+	var tableNames []string
+	for rows.Next() {
+		var tableName string
+		if err := rows.Scan(&tableName); err != nil {
+			return nil, fmt.Errorf("Error scanning table name: %v", err)
+		}
+		tableNames = append(tableNames, tableName)
+	}
+
+	return tableNames, nil
+}
+
 func CreateDatabase(db *sql.DB, dbName string) error {
 	_, err := db.Exec(fmt.Sprintf("CREATE DATABASE %s", dbName))
 	return err

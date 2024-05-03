@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -84,4 +85,66 @@ func setupRoutes(app *fiber.App) {
 
 		return c.Status(fiber.StatusOK).SendString("Training initialization started successfully")
 	})
+
+	app.Get("/data", func(c *fiber.Ctx) error {
+		dbName := c.Query("dbname")
+
+		if dbName == "" {
+			// List databases
+			databaseNames, err := ListDatabases(DBJB)
+			if err != nil {
+				return c.Status(fiber.StatusInternalServerError).SendString("Error fetching databases: " + err.Error())
+			}
+
+			// Format as Chonky files
+			files := formatAsChonkyFiles(databaseNames, true) // Assuming isDir=true for databases
+
+			folderChain := []map[string]string{{"id": "root", "name": "Home"}}
+			response := map[string]interface{}{
+				"files":       files,
+				"folderChain": folderChain,
+			}
+			return c.JSON(response)
+
+		} else {
+			// Ensure the database exists (modify if needed)
+			err := EnsureDatabaseExists(DBJB, dbName)
+			if err != nil {
+				return c.Status(fiber.StatusBadRequest).SendString("Database not found: " + dbName)
+			}
+
+			// Get table names from the provided database
+			tableNames, err := GetTableNames(DBJB, dbName)
+			if err != nil {
+				return c.Status(fiber.StatusInternalServerError).SendString("Error fetching tables: " + err.Error())
+			}
+
+			// Format as Chonky files
+			files := formatAsChonkyFiles(tableNames, true) // Assuming isDir=true for tables
+
+			// Adjust folderChain if needed (e.g., to include the dbName)
+			folderChain := []map[string]string{
+				{"id": "root", "name": "Home"},
+				{"id": dbName, "name": dbName},
+			}
+
+			response := map[string]interface{}{
+				"files":       files,
+				"folderChain": folderChain,
+			}
+			return c.JSON(response)
+		}
+	})
+}
+
+func formatAsChonkyFiles(names []string, isDir bool) []map[string]string {
+	files := make([]map[string]string, len(names))
+	for i, name := range names {
+		files[i] = map[string]string{
+			"id":    name,
+			"name":  name,
+			"isDir": strconv.FormatBool(isDir), // Convert boolean to string
+		}
+	}
+	return files
 }
