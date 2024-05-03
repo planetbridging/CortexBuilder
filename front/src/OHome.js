@@ -21,6 +21,8 @@ import { FaFolder, FaEye, FaBookOpen } from "react-icons/fa";
 
 import { FaHome } from "react-icons/fa";
 
+import { MdNotStarted } from "react-icons/md";
+
 import {
   BrowserRouter as Router,
   Switch,
@@ -28,8 +30,12 @@ import {
   Link as RLink,
   useParams,
 } from "react-router-dom";
+import { FaTable } from "react-icons/fa6";
 import OFileBrowser from "./OFileBrowser";
-import OTraining from "./OTraining";
+
+import OInitialize from "./OInitialize";
+import OModelViewer from "./OModelViewer";
+import ODataViewer from "./ODataViewer";
 
 class OHome extends Component {
   state = {
@@ -41,7 +47,7 @@ class OHome extends Component {
     // Do something with the received data. You can update state, etc.
     console.log("Received dbName:", dbName);
     console.log("Received collectionName:", collectionName);
-  }
+  };
 
   handleLoginLogout = () => {
     this.setState((prevState) => ({
@@ -90,15 +96,6 @@ class OHome extends Component {
               </WrapItem>
 
               <WrapItem>
-                <RLink to="/training">
-                  <Box p={2} bg="white" boxShadow="sm" borderRadius="md">
-                    <Text mt={2}>
-                      <Icon as={FaBookOpen} /> Training
-                    </Text>
-                  </Box>
-                </RLink>
-              </WrapItem>
-              <WrapItem>
                 <Box p={2} bg="white" boxShadow="sm" borderRadius="md">
                   <Text mt={2}>
                     <Icon as={FiSettings} /> Settings
@@ -122,6 +119,47 @@ class OHome extends Component {
             </Button>
           </Flex>
 
+          <Flex
+            justifyContent="space-between"
+            alignItems="center"
+            bg="gray.100"
+            p={4}
+            wrap="wrap"
+            bg="#6d7d98"
+          >
+            <Wrap spacing={8} wrap="wrap" justify="center">
+              <WrapItem>
+                <RLink to="/modelviewer">
+                  <Box p={2} bg="white" boxShadow="sm" borderRadius="md">
+                    <Text mt={2}>
+                      <Icon as={FaEye} /> Model viewer
+                    </Text>
+                  </Box>
+                </RLink>
+              </WrapItem>
+
+              <WrapItem>
+                <RLink to="/initialize">
+                  <Box p={2} bg="white" boxShadow="sm" borderRadius="md">
+                    <Text mt={2}>
+                      <Icon as={MdNotStarted} /> Initialize
+                    </Text>
+                  </Box>
+                </RLink>
+              </WrapItem>
+
+              <WrapItem>
+                <RLink to="/dataviewer">
+                  <Box p={2} bg="white" boxShadow="sm" borderRadius="md">
+                    <Text mt={2}>
+                      <Icon as={FaTable} /> Data viewer
+                    </Text>
+                  </Box>
+                </RLink>
+              </WrapItem>
+            </Wrap>
+          </Flex>
+
           {/* Main content */}
           <Box flex="1" p={4} bg="gray.50">
             {/* Dynamic content based on login status */}
@@ -134,8 +172,16 @@ class OHome extends Component {
                 <OFileBrowser />
               </Route>
 
-              <Route exact path="/training">
-                <OTraining toast={this.props.toast} onDataUpdate={this.handleDataUpdate} />
+              <Route exact path="/modelviewer">
+                <OModelViewer onDataUpdate={this.handleDataUpdate} />
+              </Route>
+
+              <Route exact path="/initialize">
+                <OInitialize toast={this.props.toast} />
+              </Route>
+
+              <Route exact path="/dataviewer">
+                <ODataViewer />
               </Route>
             </Switch>
           </Box>
@@ -144,5 +190,7 @@ class OHome extends Component {
     );
   }
 }
+
+// <OTraining  onDataUpdate={this.handleDataUpdate} />
 
 export default OHome;
