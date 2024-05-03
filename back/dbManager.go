@@ -117,15 +117,14 @@ func ListDatabases(db *sql.DB) ([]string, error) {
 }
 
 func GetTableNames(db *sql.DB, dbName string) ([]string, error) {
-	// Prepare the statement with a placeholder
-	stmt, err := db.Prepare("SHOW TABLES FROM ?")
-	if err != nil {
-		return nil, fmt.Errorf("Error preparing statement: %v", err)
-	}
-	defer stmt.Close()
+	// Sanitize dbName to prevent SQL Injection
+	dbName = strings.ReplaceAll(dbName, "'", "''")
 
-	// Execute the query, safely passing the dbName
-	rows, err := stmt.Query(dbName)
+	// Create the query dynamically
+	query := fmt.Sprintf("SHOW TABLES FROM `%s`", dbName)
+
+	// Execute the query directly without preparing a statement with a placeholder
+	rows, err := db.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("Error executing query: %v", err)
 	}

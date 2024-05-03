@@ -19,6 +19,7 @@ import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 
 import OModelViewer from "./OModelViewer";
+import ODataViewer from "./ODataViewer";
 
 class OTraining extends Component {
   constructor(props) {
@@ -32,10 +33,9 @@ class OTraining extends Component {
     };
   }
 
- 
-  onDataChange = (dbName,collectionName) => {
+  onDataChange = (dbName, collectionName) => {
     this.props.onDataUpdate(dbName, collectionName);
-  }
+  };
 
   handleSubmit = async (event) => {
     event.preventDefault();
@@ -93,7 +93,7 @@ class OTraining extends Component {
         </TabList>
         <TabPanels>
           <TabPanel>
-            <OModelViewer onDataUpdate={this.onDataChange}/>
+            <OModelViewer onDataUpdate={this.onDataChange} />
           </TabPanel>
           <TabPanel>
             <form onSubmit={this.handleSubmit}>
@@ -157,7 +157,7 @@ class OTraining extends Component {
             </form>
           </TabPanel>
           <TabPanel>
-            <p>two!</p>
+            <ODataViewer />
           </TabPanel>
           <TabPanel>
             <p>three!</p>

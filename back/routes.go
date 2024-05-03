@@ -96,8 +96,16 @@ func setupRoutes(app *fiber.App) {
 				return c.Status(fiber.StatusInternalServerError).SendString("Error fetching databases: " + err.Error())
 			}
 
+			// Filter out system databases
+			filteredDatabases := []string{}
+			for _, dbName := range databaseNames {
+				if dbName != "sys" && dbName != "performance_schema" && dbName != "mysql" && dbName != "information_schema" {
+					filteredDatabases = append(filteredDatabases, dbName)
+				}
+			}
+
 			// Format as Chonky files
-			files := formatAsChonkyFiles(databaseNames, true) // Assuming isDir=true for databases
+			files := formatAsChonkyFiles(filteredDatabases, true) // Assuming isDir=true for databases
 
 			folderChain := []map[string]string{{"id": "root", "name": "Home"}}
 			response := map[string]interface{}{
