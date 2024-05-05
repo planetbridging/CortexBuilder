@@ -62,6 +62,18 @@ class ODataViewer extends React.Component {
 
     if (action.id === "open_folder" && selectedFile && selectedFile.isDir) {
       this.listTables(selectedFile.name);
+    } else if (
+      action.id === "open_folder" &&
+      selectedFile &&
+      !selectedFile.isDir
+    ) {
+      //console.log("Selected tbl from db:", selectedFile.name);
+    }
+
+    if (action.id === "mount_training_data" && selectedFile) {
+      if (!selectedFile.isDir) {
+        this.props.handleTrainingDataUpdate(selectedFile.name);
+      }
     }
   };
 
@@ -77,7 +89,21 @@ class ODataViewer extends React.Component {
       hotkeys: ["enter"],
     });
 
-    return [openFolderAction];
+    const mountTrainingDataAction = defineFileAction({
+      id: "mount_training_data",
+      button: {
+        name: "Mount Training Data", // Label for the button
+        toolbar: false, // Show only in context menu
+        contextMenu: true,
+        icon: ChonkyIconName.users, // Example icon
+      },
+      // Disable hotkey for this action
+      hotkeys: [],
+      // Check if the file is not a directory
+      shouldShow: (files) => files.length === 1 && !files[0].isDir,
+    });
+
+    return [openFolderAction, mountTrainingDataAction];
   };
 
   navigateUp = () => {

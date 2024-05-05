@@ -12,6 +12,8 @@ import (
 
 func setupRoutes(app *fiber.App) {
 	app.Post("/mountpopulation", mountPopulationHandler)
+	app.Post("/mounttrainingdata", mountTrainingDataHandler)
+
 	app.Get("/files/*", func(c *fiber.Ctx) error {
 		// Extracting the subpath or handling root
 		subPath := c.Params("*")
@@ -176,14 +178,51 @@ func mountPopulationHandler(c *fiber.Ctx) error {
 	}
 
 	// Logging the data to the console
-	fmt.Printf("Received dbName: %s\n", data.DbName)
-	fmt.Printf("Received collectionName: %s\n", data.CollectionName)
+	//fmt.Printf("Received dbName: %s\n", data.DbName)
+	//fmt.Printf("Received collectionName: %s\n", data.CollectionName)
 
 	// Check if data is received properly
 	if data.DbName == "" || data.CollectionName == "" {
 		fmt.Println("Did not receive expected variables.")
 	} else {
-		fmt.Println("success")
+		//fmt.Println("success")
+		dbNameSync = data.DbName
+		collectionSync = data.CollectionName
+		updateFrontend()
+	}
+
+	// Return a response to the client
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Data received successfully",
+	})
+}
+
+func mountTrainingDataHandler(c *fiber.Ctx) error {
+	// Define a struct to map your JSON data
+	type RequestData struct {
+		TableName string `json:"tableName"` // Notice TableName is capitalized
+	}
+
+	// Instance of the struct to hold your POST data
+	data := new(RequestData)
+
+	// Parsing the JSON body to the struct
+	if err := c.BodyParser(data); err != nil {
+		fmt.Println("Error parsing JSON:", err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Cannot parse JSON",
+		})
+	}
+
+	// Logging the data to the console
+	fmt.Printf("Received tableName: %s\n", data.TableName)
+
+	// Check if data is received properly
+	if data.TableName == "" {
+		fmt.Println("Did not receive expected variables.")
+	} else {
+		fmt.Println("Received tableName:", data.TableName)
+		tableNameSync = data.TableName // Assuming tableNameSync is a global variable
 		updateFrontend()
 	}
 

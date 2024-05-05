@@ -131,6 +131,21 @@ class OHome extends Component {
       });
   };
 
+  handleTrainingDataUpdate = (tableName) => {
+    // Do something with the received data. You can update state, etc.
+    console.log("Received tableName:", tableName);
+    axios
+      .post("http://localhost:4123/mounttrainingdata", {
+        tableName,
+      })
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Error in POST request:", error);
+      });
+  };
+
   handleLoginLogout = () => {
     this.setState((prevState) => ({
       isLoggedIn: !prevState.isLoggedIn,
@@ -263,7 +278,9 @@ class OHome extends Component {
               </Route>
 
               <Route exact path="/dataviewer">
-                <ODataViewer />
+                <ODataViewer
+                  handleTrainingDataUpdate={this.handleTrainingDataUpdate}
+                />
               </Route>
             </Switch>
           </Box>
