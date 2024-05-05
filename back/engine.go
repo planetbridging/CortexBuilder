@@ -11,17 +11,23 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/joho/godotenv"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/websocket/v2"
+	"github.com/joho/godotenv"
 )
 
 var (
-	Config        DBConfig
-	DBJB          *sql.DB
-	scrappingLink string
+	Config         DBConfig
+	DBJB           *sql.DB
+	scrappingLink  string
+	dbNameSync     string
+	collectionSync string
+	tableNameSync  string
 )
+
+// Define a global variable to hold the connected WebSocket clients
+var clients = make(map[*websocket.Conn]bool)
 
 func main() {
 	/*start := time.Now() // Start timing
@@ -88,9 +94,30 @@ func startWebServer() {
 	//decimals := transformString(str)
 	//fmt.Printf("String: %s\nDecimals: %s\n", str, decimals)
 
+	// Set global variables
+	dbNameSync = "old_your_db_name"
+	collectionSync = "old_your_collection_name"
+	tableNameSync = "old_your_table_name"
+
+	app.Get("/msg", websocket.New(handleWebSocket))
+
+	// Example route
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
+		// Set new global variables
+		dbNameSync = "new_db_name"
+		collectionSync = "new_collection_name"
+		tableNameSync = "new_table_name"
+
+		// Send the new values through the WebSocket
+		updateFrontend()
+
+		// Send response
+		return c.SendString("New values set and sent through WebSocket.")
 	})
+
+	/*app.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("Hello, World!")
+	})*/
 
 	setupRoutes(app)
 
@@ -111,6 +138,54 @@ func startWebServer() {
 		fmt.Println("Error shutting down Fiber app:", err)
 	}
 	fmt.Println("Server shut down.")
+}
+
+func handleWebSocket(c *websocket.Conn) {
+	clients[c] = true
+	defer func() {
+		c.Close()
+		delete(clients, c)
+	}()
+
+	err := c.WriteJSON(map[string]string{
+		"dbNameSync":     dbNameSync,
+		"collectionSync": collectionSync,
+		"tableNameSync":  tableNameSync,
+	})
+	if err != nil {
+		log.Println("Error writing JSON to WebSocket:", err)
+		return
+	}
+
+	// Introduce a for loop to keep the connection alive and handle any incoming messages.
+	for {
+		_, msg, err := c.ReadMessage()
+		if err != nil {
+			log.Println("Error reading message:", err)
+			break
+		}
+		log.Printf("Received: %s", msg)
+	}
+}
+
+// Call this function whenever you need to update the frontend with new data
+func updateFrontend() {
+	broadcastData(map[string]string{
+		"dbNameSync":     dbNameSync,
+		"collectionSync": collectionSync,
+		"tableNameSync":  tableNameSync,
+	})
+}
+
+func broadcastData(data map[string]string) {
+	for client := range clients {
+		err := client.WriteJSON(data)
+		if err != nil {
+			log.Println("Error writing JSON to WebSocket:", err)
+			client.Close()
+			delete(clients, client)
+		}
+	}
 }
 
 func testing() {

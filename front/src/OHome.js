@@ -37,11 +37,81 @@ import OInitialize from "./OInitialize";
 import OModelViewer from "./OModelViewer";
 import ODataViewer from "./ODataViewer";
 
+//prod
+const protocolPrefix = window.location.protocol === "https:" ? "wss:" : "ws:";
+var wsUrl = `${protocolPrefix}//${window.location.host}`;
+
+//testing
+wsUrl = "ws://localhost:4123";
+
+//var deployMode = true;
+
+var webSockUrl = wsUrl + "/msg";
+
 class OHome extends Component {
   state = {
     isLoggedIn: false,
     content: "Please log in.",
   };
+
+  componentDidMount() {
+    try {
+      var ws = new WebSocket(webSockUrl);
+
+      ws.onopen = () => {
+        console.log("Connected to server");
+      };
+
+      ws.onmessage = (event) => {
+        console.log("Message from server: ", event.data);
+      };
+
+      ws.onclose = (event) => {
+        if (event.wasClean) {
+          console.log("Disconnected from server cleanly");
+        } else {
+          console.log("Disconnected from server due to a transmission error");
+        }
+        console.log("Trying to reconnect to the server...");
+        setTimeout(this.connectWebSocket, 3000); // Attempt to reconnect after 3 seconds
+      };
+
+      ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+
+      this.setState({ ws });
+    } catch (ex) {
+      console.log(ex);
+    }
+  }
+
+  connectWebSocket = () => {
+    var ws = new WebSocket(webSockUrl);
+
+    ws.onopen = () => {
+      console.log("Reconnected to server");
+    };
+
+    ws.onmessage = (event) => {
+      console.log("Message from server: ", event.data);
+    };
+
+    ws.onclose = () => {
+      console.log("Disconnected, trying to reconnect...");
+      setTimeout(this.connectWebSocket, 3000);
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error on reconnect:", error);
+    };
+
+    this.setState({ ws });
+  };
+
+  componentWillUnmount() {
+    if (this.state.ws) this.state.ws.close();
+  }
 
   handleDataUpdate = (dbName, collectionName) => {
     // Do something with the received data. You can update state, etc.
