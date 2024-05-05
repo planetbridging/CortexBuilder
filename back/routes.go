@@ -11,6 +11,7 @@ import (
 )
 
 func setupRoutes(app *fiber.App) {
+	app.Post("/mountpopulation", mountPopulationHandler)
 	app.Get("/files/*", func(c *fiber.Ctx) error {
 		// Extracting the subpath or handling root
 		subPath := c.Params("*")
@@ -155,4 +156,39 @@ func formatAsChonkyFiles(names []string, isDir bool) []map[string]string {
 		}
 	}
 	return files
+}
+
+func mountPopulationHandler(c *fiber.Ctx) error {
+	// Define a struct to map your JSON data
+	type RequestData struct {
+		DbName         string `json:"dbName"`
+		CollectionName string `json:"collectionName"`
+	}
+
+	// Instance of the struct to hold your POST data
+	data := new(RequestData)
+
+	// Parsing the JSON body to the struct
+	if err := c.BodyParser(data); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Cannot parse JSON",
+		})
+	}
+
+	// Logging the data to the console
+	fmt.Printf("Received dbName: %s\n", data.DbName)
+	fmt.Printf("Received collectionName: %s\n", data.CollectionName)
+
+	// Check if data is received properly
+	if data.DbName == "" || data.CollectionName == "" {
+		fmt.Println("Did not receive expected variables.")
+	} else {
+		fmt.Println("success")
+		updateFrontend()
+	}
+
+	// Return a response to the client
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Data received successfully",
+	})
 }

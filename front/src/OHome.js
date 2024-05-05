@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import axios from "axios";
 import {
   Box,
   Flex,
@@ -117,6 +118,17 @@ class OHome extends Component {
     // Do something with the received data. You can update state, etc.
     console.log("Received dbName:", dbName);
     console.log("Received collectionName:", collectionName);
+    axios
+      .post("http://localhost:4123/mountpopulation", {
+        dbName,
+        collectionName,
+      })
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Error in POST request:", error);
+      });
   };
 
   handleLoginLogout = () => {
