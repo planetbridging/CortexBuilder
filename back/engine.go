@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 
@@ -147,10 +148,18 @@ func handleWebSocket(c *websocket.Conn) {
 		delete(clients, c)
 	}()
 
+	rowCount, errCount := GetRowCount(DBJB, tableNameSync)
+	if errCount != nil {
+		rowCount = 0
+	}
+
+	rowCountStr := strconv.Itoa(rowCount)
+
 	err := c.WriteJSON(map[string]string{
 		"dbNameSync":     dbNameSync,
 		"collectionSync": collectionSync,
 		"tableNameSync":  tableNameSync,
+		"datasetSize":    rowCountStr,
 	})
 	if err != nil {
 		log.Println("Error writing JSON to WebSocket:", err)
@@ -170,10 +179,18 @@ func handleWebSocket(c *websocket.Conn) {
 
 // Call this function whenever you need to update the frontend with new data
 func updateFrontend() {
+
+	rowCount, err := GetRowCount(DBJB, tableNameSync)
+	if err != nil {
+		rowCount = 0
+	}
+
+	rowCountStr := strconv.Itoa(rowCount)
 	broadcastData(map[string]string{
 		"dbNameSync":     dbNameSync,
 		"collectionSync": collectionSync,
 		"tableNameSync":  tableNameSync,
+		"datasetSize":    rowCountStr,
 	})
 }
 

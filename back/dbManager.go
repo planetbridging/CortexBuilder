@@ -280,6 +280,16 @@ func createView(db *sql.DB, viewStatement string, viewStatementName string, db_n
 	return nil
 }
 
+func GetRowCount(db *sql.DB, tableName string) (int, error) {
+	var rowCount int
+	err := db.QueryRow("SELECT COUNT(*) FROM " + tableName).Scan(&rowCount)
+	if err != nil {
+		// If an error occurs, set rowCount to 0
+		return 0, nil
+	}
+	return rowCount, nil
+}
+
 func selectAllToJsonOld(db *sql.DB, tableName string, model interface{}) ([]byte, error) {
 	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s", tableName))
 	if err != nil {

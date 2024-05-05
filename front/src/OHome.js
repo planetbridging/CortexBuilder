@@ -38,6 +38,8 @@ import OInitialize from "./OInitialize";
 import OModelViewer from "./OModelViewer";
 import ODataViewer from "./ODataViewer";
 
+import OMount from "./OMount";
+
 //prod
 const protocolPrefix = window.location.protocol === "https:" ? "wss:" : "ws:";
 var wsUrl = `${protocolPrefix}//${window.location.host}`;
@@ -53,6 +55,9 @@ class OHome extends Component {
   state = {
     isLoggedIn: false,
     content: "Please log in.",
+    dbNameSync: "",
+    collectionSync: "",
+    tableNameSync: "",
   };
 
   componentDidMount() {
@@ -64,7 +69,7 @@ class OHome extends Component {
       };
 
       ws.onmessage = (event) => {
-        console.log("Message from server: ", event.data);
+        this.wOnmsgProcess(event);
       };
 
       ws.onclose = (event) => {
@@ -95,7 +100,9 @@ class OHome extends Component {
     };
 
     ws.onmessage = (event) => {
-      console.log("Message from server: ", event.data);
+      console.log(event);
+      //console.log("Message from server: ", event.data);
+      this.wOnmsgProcess(event);
     };
 
     ws.onclose = () => {
@@ -109,6 +116,35 @@ class OHome extends Component {
 
     this.setState({ ws });
   };
+
+  wOnmsgProcess(event) {
+    try {
+      console.log("Message from server: ", event.data);
+      var j = JSON.parse(event.data);
+      var tmpDBName = "",
+        tmpColl = "",
+        tmpTblName = "";
+      var lstk = Object.keys(j);
+
+      if (lstk.includes("dbNameSync")) {
+        tmpDBName = j["dbNameSync"];
+      }
+      if (lstk.includes("collectionSync")) {
+        tmpColl = j["collectionSync"];
+      }
+      if (lstk.includes("tableNameSync")) {
+        tmpTblName = j["tableNameSync"];
+      }
+      console.log(tmpDBName);
+      this.setState({
+        dbNameSync: tmpDBName,
+        collectionSync: tmpColl,
+        tableNameSync: tmpTblName,
+      });
+    } catch (ex) {
+      console.log(ex);
+    }
+  }
 
   componentWillUnmount() {
     if (this.state.ws) this.state.ws.close();
@@ -154,6 +190,7 @@ class OHome extends Component {
   };
 
   render() {
+    const { dbNameSync, collectionSync, tableNameSync } = this.state;
     return (
       <Box display="flex" flexDirection="column" h="100vh" w="100vw">
         <Router>
@@ -264,6 +301,11 @@ class OHome extends Component {
             <Switch>
               <Route exact path="/">
                 {this.state.content}
+                <OMount
+                  dbNameSync={dbNameSync}
+                  collectionSync={collectionSync}
+                  tableNameSync={tableNameSync}
+                />
               </Route>
               <Route exact path="/files">
                 <OFileBrowser />
