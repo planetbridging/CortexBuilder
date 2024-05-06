@@ -13,6 +13,7 @@ function startHosting() {
   const client = new MongoClient(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    maxPoolSize: 10000,
   });
 
   app.use(cors()); // Enable CORS for all routes and origins
@@ -36,7 +37,8 @@ function startHosting() {
     }
   });
 
-  app.get("/getModel", async (req, res) => {
+  //not que
+  /*app.get("/getModel", async (req, res) => {
     const { dbName, collectionName, modelId } = req.query;
     if (!dbName || !collectionName || !modelId) {
       return res.status(400).json({
@@ -60,6 +62,44 @@ function startHosting() {
       res.status(500).json({ message: "Failed to retrieve the model" });
     } finally {
       await client.close();
+    }
+  });*/
+
+  // Global queue to store requests
+  const requestQueue = [];
+
+  app.get("/getModel", async (req, res) => {
+    const { dbName, collectionName, modelId } = req.query;
+    if (!dbName || !collectionName || !modelId) {
+      return res.status(400).json({
+        message: "Database name, collection name, and model ID are required",
+      });
+    }
+
+    // Add the request to the queue
+    requestQueue.push({ dbName, collectionName, modelId });
+
+    // Process the requests sequentially
+    while (requestQueue.length > 0) {
+      const request = requestQueue.shift();
+      try {
+        // Connect to the database
+        await client.connect();
+        const db = client.db(request.dbName);
+        const collection = db.collection(request.collectionName);
+        const model = await collection.findOne({
+          _id: new ObjectId(request.modelId),
+        });
+
+        if (model) {
+          res.status(200).json(model);
+        } else {
+          res.status(404).json({ message: "Model not found" });
+        }
+      } catch (error) {
+        console.error("Error retrieving model:", error);
+        res.status(500).json({ message: "Failed to retrieve the model" });
+      }
     }
   });
 

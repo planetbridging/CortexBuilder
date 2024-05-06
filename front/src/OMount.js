@@ -18,6 +18,7 @@ import {
   NumberDecrementStepper,
 } from "@chakra-ui/react";
 import React from "react";
+import axios from "axios";
 
 class OMount extends React.Component {
   state = {
@@ -62,7 +63,12 @@ class OMount extends React.Component {
                 </NumberInputStepper>
               </NumberInput>
               <ButtonGroup gap="4">
-                <Button colorScheme="blackAlpha">Start</Button>
+                <Button
+                  colorScheme="blackAlpha"
+                  onClick={() => this.startEvaluation()}
+                >
+                  Start
+                </Button>
               </ButtonGroup>
             </Stack>
           </CardBody>
@@ -72,6 +78,28 @@ class OMount extends React.Component {
       return <p>Need to select db & collection & training data set</p>;
     }
   }
+
+  startEvaluation = async () => {
+    const { dbNameSync, collectionSync, tableNameSync, datasetSize } =
+      this.props;
+    const { batch } = this.state;
+    var batchNumber = batch;
+    batchNumber = batchNumber.toString();
+    try {
+      const response = await axios.post("http://localhost:4123/evaluation", {
+        dbName: dbNameSync,
+        collectionName: collectionSync,
+        tableName: tableNameSync,
+        batchNumber,
+      });
+
+      // Handle the response (e.g., update UI, show success message, etc.)
+      console.log("Evaluation response:", response.data);
+    } catch (error) {
+      // Handle errors (e.g., show error message)
+      console.error("Error during evaluation:", error);
+    }
+  };
 
   handleAmountChange = (valueString) => {
     // Convert the string value to a number

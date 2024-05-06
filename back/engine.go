@@ -44,6 +44,7 @@ func main() {
 	fmt.Printf("Execution time: %v s\n", duration.Seconds())       // Print time in seconds
 	*/
 	setupDB()
+	//startEvaluation()
 	startWebServer()
 }
 
