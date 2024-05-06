@@ -11,13 +11,21 @@ import {
   Text,
   Wrap,
   WrapItem,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
 } from "@chakra-ui/react";
 import React from "react";
 
 class OMount extends React.Component {
-  state = {};
+  state = {
+    batch: 10,
+  };
 
   showEvaluation() {
+    const { batch } = this.state;
     var dbNameSync = this.props.dbNameSync;
     var collectionSync = this.props.collectionSync;
     var tableNameSync = this.props.tableNameSync;
@@ -37,6 +45,22 @@ class OMount extends React.Component {
 
           <CardBody>
             <Stack divider={<StackDivider />} spacing="4">
+              <Text pt="2" fontSize="sm">
+                Batch sizes - {batch}/{this.props.datasetSize}
+              </Text>
+              <NumberInput
+                value={batch}
+                onChange={(valueString) => this.handleAmountChange(valueString)}
+                max={this.props.datasetSize}
+                min={1}
+                clampValueOnBlur={false}
+              >
+                <NumberInputField placeholder="Amount" />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
               <ButtonGroup gap="4">
                 <Button colorScheme="blackAlpha">Start</Button>
               </ButtonGroup>
@@ -48,6 +72,15 @@ class OMount extends React.Component {
       return <p>Need to select db & collection & training data set</p>;
     }
   }
+
+  handleAmountChange = (valueString) => {
+    // Convert the string value to a number
+    var value = parseInt(valueString, 10) || 0;
+    if (value >= this.props.datasetSize) {
+      value = this.props.datasetSize;
+    }
+    this.setState({ batch: value });
+  };
 
   showSelectedPopulation() {
     var dbNameSync = this.props.dbNameSync;
@@ -83,11 +116,6 @@ class OMount extends React.Component {
                   {collectionSync}
                 </Text>
               </Box>
-              <Box>
-                <ButtonGroup gap="4">
-                  <Button colorScheme="blackAlpha">Evaluate</Button>
-                </ButtonGroup>
-              </Box>
             </Stack>
           </CardBody>
         </Card>
@@ -115,12 +143,6 @@ class OMount extends React.Component {
                 <Text pt="2" fontSize="sm">
                   {tableNameSync}
                 </Text>
-              </Box>
-
-              <Box>
-                <ButtonGroup gap="4">
-                  <Button colorScheme="blackAlpha">Placeholder</Button>
-                </ButtonGroup>
               </Box>
             </Stack>
           </CardBody>

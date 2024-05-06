@@ -1,8 +1,20 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"os"
+
+	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/mem"
 )
+
+// SystemInfo holds data about system resources
+type SystemInfo struct {
+	CPUs        []cpu.InfoStat `json:"cpus"`
+	TotalMemory uint64         `json:"total_memory"`
+	FreeMemory  uint64         `json:"free_memory"`
+}
 
 func ensureDir(dirName string) {
 	if _, err := os.Stat(dirName); os.IsNotExist(err) {
@@ -37,4 +49,32 @@ func listFilesInDir(dirPath string) ([]map[string]interface{}, error) {
 	}
 
 	return files, nil
+}
+
+func GetSystemInfo() (string, error) {
+	// Getting CPU information
+	cpus, err := cpu.Info()
+	if err != nil {
+		return "", fmt.Errorf("error getting CPU info: %v", err)
+	}
+
+	// Getting virtual memory stats
+	vmStat, err := mem.VirtualMemory()
+	if err != nil {
+		return "", fmt.Errorf("error getting virtual memory stats: %v", err)
+	}
+
+	sysInfo := SystemInfo{
+		CPUs:        cpus,
+		TotalMemory: vmStat.Total,
+		FreeMemory:  vmStat.Available,
+	}
+
+	// Convert system info to JSON
+	jsonBytes, err := json.Marshal(sysInfo)
+	if err != nil {
+		return "", fmt.Errorf("error marshalling system info to JSON: %v", err)
+	}
+
+	return string(jsonBytes), nil
 }

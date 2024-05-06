@@ -25,12 +25,18 @@ var (
 	dbNameSync     string
 	collectionSync string
 	tableNameSync  string
+	computerSpecs  string
 )
 
 // Define a global variable to hold the connected WebSocket clients
 var clients = make(map[*websocket.Conn]bool)
 
 func main() {
+	computerSpecs, pcErr := GetSystemInfo()
+	if pcErr != nil {
+		log.Fatal(pcErr)
+	}
+	fmt.Println(computerSpecs)
 	/*start := time.Now() // Start timing
 	testing()
 	duration := time.Since(start)                                  // Calculate duration

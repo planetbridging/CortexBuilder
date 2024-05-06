@@ -58,6 +58,7 @@ class OHome extends Component {
     dbNameSync: "",
     collectionSync: "",
     tableNameSync: "",
+    datasetSize: "",
   };
 
   componentDidMount() {
@@ -123,7 +124,8 @@ class OHome extends Component {
       var j = JSON.parse(event.data);
       var tmpDBName = "",
         tmpColl = "",
-        tmpTblName = "";
+        tmpTblName = "",
+        tmpDatasetSize = "";
       var lstk = Object.keys(j);
 
       if (lstk.includes("dbNameSync")) {
@@ -135,11 +137,17 @@ class OHome extends Component {
       if (lstk.includes("tableNameSync")) {
         tmpTblName = j["tableNameSync"];
       }
+
+      if (lstk.includes("datasetSize")) {
+        tmpDatasetSize = j["datasetSize"];
+      }
+
       console.log(tmpDBName);
       this.setState({
         dbNameSync: tmpDBName,
         collectionSync: tmpColl,
         tableNameSync: tmpTblName,
+        datasetSize: tmpDatasetSize,
       });
     } catch (ex) {
       console.log(ex);
@@ -190,7 +198,8 @@ class OHome extends Component {
   };
 
   render() {
-    const { dbNameSync, collectionSync, tableNameSync } = this.state;
+    const { dbNameSync, collectionSync, tableNameSync, datasetSize } =
+      this.state;
     return (
       <Box display="flex" flexDirection="column" h="100vh" w="100vw">
         <Router>
@@ -305,6 +314,7 @@ class OHome extends Component {
                   dbNameSync={dbNameSync}
                   collectionSync={collectionSync}
                   tableNameSync={tableNameSync}
+                  datasetSize={datasetSize}
                 />
               </Route>
               <Route exact path="/files">
