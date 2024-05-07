@@ -47,12 +47,12 @@ class OMount extends React.Component {
           <CardBody>
             <Stack divider={<StackDivider />} spacing="4">
               <Text pt="2" fontSize="sm">
-                Batch sizes - {batch}/{this.props.datasetSize}
+                Batch sizes - {batch}/{this.props.modelCount}
               </Text>
               <NumberInput
                 value={batch}
                 onChange={(valueString) => this.handleAmountChange(valueString)}
-                max={this.props.datasetSize}
+                max={this.props.modelCount}
                 min={1}
                 clampValueOnBlur={false}
               >
@@ -80,7 +80,7 @@ class OMount extends React.Component {
   }
 
   startEvaluation = async () => {
-    const { dbNameSync, collectionSync, tableNameSync, datasetSize } =
+    const { dbNameSync, collectionSync, tableNameSync, modelCount } =
       this.props;
     const { batch } = this.state;
     var batchNumber = batch;
@@ -104,8 +104,8 @@ class OMount extends React.Component {
   handleAmountChange = (valueString) => {
     // Convert the string value to a number
     var value = parseInt(valueString, 10) || 0;
-    if (value >= this.props.datasetSize) {
-      value = this.props.datasetSize;
+    if (value >= this.props.modelCount) {
+      value = this.props.modelCount;
     }
     this.setState({ batch: value });
   };

@@ -160,13 +160,17 @@ func handleWebSocket(c *websocket.Conn) {
 		rowCount = 0
 	}
 
+	modelCount, _ := getModelCount(dbNameSync, collectionSync)
+
 	rowCountStr := strconv.Itoa(rowCount)
+	modelCountStr := strconv.Itoa(modelCount)
 
 	err := c.WriteJSON(map[string]string{
 		"dbNameSync":     dbNameSync,
 		"collectionSync": collectionSync,
 		"tableNameSync":  tableNameSync,
 		"datasetSize":    rowCountStr,
+		"modelCount":     modelCountStr,
 	})
 	if err != nil {
 		log.Println("Error writing JSON to WebSocket:", err)
@@ -193,11 +197,15 @@ func updateFrontend() {
 	}
 
 	rowCountStr := strconv.Itoa(rowCount)
+	modelCount, _ := getModelCount(dbNameSync, collectionSync)
+	modelCountStr := strconv.Itoa(modelCount)
+
 	broadcastData(map[string]string{
 		"dbNameSync":     dbNameSync,
 		"collectionSync": collectionSync,
 		"tableNameSync":  tableNameSync,
 		"datasetSize":    rowCountStr,
+		"modelCount":     modelCountStr,
 	})
 }
 

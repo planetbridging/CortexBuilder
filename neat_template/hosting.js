@@ -165,6 +165,29 @@ function startHosting() {
     }
   });
 
+  app.get("/countListModels", async (req, res) => {
+    const dbName = req.query.dbName;
+    const collectionName = req.query.collectionName;
+
+    if (!dbName || !collectionName) {
+      return res
+        .status(400)
+        .json({ message: "Database and collection names are required" });
+    }
+
+    try {
+      await client.connect();
+      const collection = client.db(dbName).collection(collectionName);
+      const count = await collection.countDocuments();
+      res.status(200).json({ count });
+    } catch (error) {
+      console.error("Error retrieving model count:", error);
+      res.status(500).json({ message: "Failed to retrieve model count" });
+    } finally {
+      await client.close();
+    }
+  });
+
   app.get("/", (req, res) => {
     res.send("Hello, World!");
   });

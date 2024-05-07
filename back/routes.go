@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 
@@ -265,4 +266,31 @@ func runEvaluation(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Data received successfully",
 	})
+}
+
+func getModelCount(dbName, collectionName string) (int, error) {
+	url := fmt.Sprintf("http://localhost:1789/countListModels?dbName=%s&collectionName=%s", dbName, collectionName)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return 0, fmt.Errorf("error making GET request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return 0, fmt.Errorf("received non-OK status code: %d", resp.StatusCode)
+	}
+
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, fmt.Errorf("error reading response body: %v", err)
+	}
+
+	var count int
+	_, err = fmt.Sscanf(string(bodyBytes), `{"count":%d}`, &count)
+	if err != nil {
+		return 0, fmt.Errorf("error parsing response: %v", err)
+	}
+
+	return count, nil
 }
