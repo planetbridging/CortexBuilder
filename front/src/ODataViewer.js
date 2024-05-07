@@ -7,7 +7,6 @@ import { defineFileAction, ChonkyIconName } from "chonky";
 
 setChonkyDefaults({ iconComponent: ChonkyIconFA });
 
-const hostIP = "localhost";
 
 class ODataViewer extends React.Component {
   state = {
@@ -22,7 +21,7 @@ class ODataViewer extends React.Component {
 
   listDatabases = () => {
     axios
-      .get(`http://${hostIP}:4123/data`)
+      .get(`http://${this.props.currentHost}:4123/data`)
       .then((response) => {
         const databases = response.data.files.map((db) => ({
           id: db.name,
@@ -40,7 +39,7 @@ class ODataViewer extends React.Component {
 
   listTables = (dbName) => {
     axios
-      .get(`http://${hostIP}:4123/data?dbname=${dbName}`)
+      .get(`http://${this.props.currentHost}:4123/data?dbname=${dbName}`)
       .then((response) => {
         const tables = response.data.files.map((table) => ({
           id: table.name,

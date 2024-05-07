@@ -9,7 +9,7 @@ import { OFFNN } from "./OFFNN";
 
 setChonkyDefaults({ iconComponent: ChonkyIconFA });
 
-const hostIP = "localhost";
+
 
 class OModelViewer extends React.Component {
   state = {
@@ -24,7 +24,7 @@ class OModelViewer extends React.Component {
 
   listDatabases = () => {
     axios
-      .get(`http://${hostIP}:1789/listDatabases`)
+      .get(`http://${this.props.currentHost}:1789/listDatabases`)
       .then((response) => {
         const databases = response.data.map((db) => ({
           id: db.name,
@@ -42,7 +42,7 @@ class OModelViewer extends React.Component {
 
   listCollections = (dbName) => {
     axios
-      .get(`http://${hostIP}:1789/listCollections?dbName=${dbName}`)
+      .get(`http://${this.props.currentHost}:1789/listCollections?dbName=${dbName}`)
       .then((response) => {
         const collections = response.data.map((collection) => ({
           id: collection.name,
@@ -61,7 +61,7 @@ class OModelViewer extends React.Component {
   listModels = (dbName, collectionName) => {
     axios
       .get(
-        `http://${hostIP}:1789/listModels?dbName=${dbName}&collectionName=${collectionName}`
+        `http://${this.props.currentHost}:1789/listModels?dbName=${dbName}&collectionName=${collectionName}`
       )
       .then((response) => {
         const models = response.data.map((model) => ({
@@ -84,7 +84,7 @@ class OModelViewer extends React.Component {
   getModel = (dbName, collectionName, modelId) => {
     axios
       .get(
-        `http://${hostIP}:1789/getModel?dbName=${dbName}&collectionName=${collectionName}&modelId=${modelId}`
+        `http://${this.props.currentHost}:1789/getModel?dbName=${dbName}&collectionName=${collectionName}&modelId=${modelId}`
       )
       .then((response) => {
         console.log("Model data:", response.data);

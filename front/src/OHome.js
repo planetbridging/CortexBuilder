@@ -45,11 +45,15 @@ const protocolPrefix = window.location.protocol === "https:" ? "wss:" : "ws:";
 var wsUrl = `${protocolPrefix}//${window.location.host}`;
 
 //testing
-wsUrl = "ws://localhost:4123";
+
 
 //var deployMode = true;
+var currentHost = window.location.hostname;
+
+wsUrl = "ws://"+currentHost+":4123";
 
 var webSockUrl = wsUrl + "/msg";
+
 
 class OHome extends Component {
   state = {
@@ -170,7 +174,7 @@ class OHome extends Component {
     console.log("Received dbName:", dbName);
     console.log("Received collectionName:", collectionName);
     axios
-      .post("http://localhost:4123/mountpopulation", {
+      .post("http://"+currentHost+":4123/mountpopulation", {
         dbName,
         collectionName,
       })
@@ -186,7 +190,7 @@ class OHome extends Component {
     // Do something with the received data. You can update state, etc.
     console.log("Received tableName:", tableName);
     axios
-      .post("http://localhost:4123/mounttrainingdata", {
+      .post("http://"+currentHost+":4123/mounttrainingdata", {
         tableName,
       })
       .then((response) => {
@@ -323,6 +327,7 @@ class OHome extends Component {
               <Route exact path="/">
                 {this.state.content}
                 <OMount
+                currentHost={currentHost}
                   dbNameSync={dbNameSync}
                   collectionSync={collectionSync}
                   tableNameSync={tableNameSync}
@@ -331,20 +336,21 @@ class OHome extends Component {
                 />
               </Route>
               <Route exact path="/files">
-                <OFileBrowser />
+                <OFileBrowser currentHost={currentHost}/>
               </Route>
 
               <Route exact path="/modelviewer">
-                <OModelViewer onDataUpdate={this.handleDataUpdate} />
+                <OModelViewer onDataUpdate={this.handleDataUpdate} currentHost={currentHost} />
               </Route>
 
               <Route exact path="/initialize">
-                <OInitialize toast={this.props.toast} />
+                <OInitialize toast={this.props.toast} currentHost={currentHost}/>
               </Route>
 
               <Route exact path="/dataviewer">
                 <ODataViewer
                   handleTrainingDataUpdate={this.handleTrainingDataUpdate}
+                  currentHost={currentHost}
                 />
               </Route>
             </Switch>

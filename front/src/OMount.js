@@ -86,7 +86,7 @@ class OMount extends React.Component {
     var batchNumber = batch;
     batchNumber = batchNumber.toString();
     try {
-      const response = await axios.post("http://localhost:4123/evaluation", {
+      const response = await axios.post("http://"+this.props.currentHost+":4123/evaluation", {
         dbName: dbNameSync,
         collectionName: collectionSync,
         tableName: tableNameSync,

@@ -2,7 +2,7 @@
 const fs = require("fs");
 
 // Import the custom module you created
-const { NeuralNetwork } = require("./simpleNN_json");
+const  NeuralNetwork  = require("./simpleNN_JSON");
 
 const { readFileAsJson } = require("./access");
 const { ONN } = require("./ONN");

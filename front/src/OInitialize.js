@@ -44,7 +44,7 @@ class OInitialize extends Component {
         additionalParam2,
         additionalParam3,
       } = this.state;
-      const response = await axios.post("http://localhost:4123/initialize", {
+      const response = await axios.post("http://"+this.props.currentHost+":4123/initialize", {
         networkType,
         spawnCount,
         additionalParam1,

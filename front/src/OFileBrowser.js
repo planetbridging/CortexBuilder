@@ -20,7 +20,7 @@ class OFileBrowser extends React.Component {
 
   fetchFileData = (path) => {
     axios
-      .get(`http://localhost:4123/files/host${path}`) // Adjust the URL as needed
+      .get(`http://`+this.props.currentHost+`:4123/files/host${path}`) // Adjust the URL as needed
       .then((response) => {
         this.setState({
           files: response.data.files,
