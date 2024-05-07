@@ -2,7 +2,7 @@
 const fs = require("fs");
 
 // Import the custom module you created
-const  NeuralNetwork  = require("./simpleNN_JSON");
+const NeuralNetwork = require("./simpleNN_JSON");
 
 const { readFileAsJson } = require("./access");
 const { ONN } = require("./ONN");
@@ -40,7 +40,7 @@ const { startHosting } = require("./hosting");
   console.log(`Execution time: ${timeInMilliseconds} ms`);
   console.log(`Execution time: ${timeInSeconds} s`);
 
-  startHosting();
+  await startHosting();
 })();
 
 function testing() {

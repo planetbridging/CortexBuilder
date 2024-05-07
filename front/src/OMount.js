@@ -23,10 +23,11 @@ import axios from "axios";
 class OMount extends React.Component {
   state = {
     batch: 10,
+    datasetSize: 1,
   };
 
   showEvaluation() {
-    const { batch } = this.state;
+    const { batch, datasetSize } = this.state;
     var dbNameSync = this.props.dbNameSync;
     var collectionSync = this.props.collectionSync;
     var tableNameSync = this.props.tableNameSync;
@@ -62,12 +63,36 @@ class OMount extends React.Component {
                   <NumberDecrementStepper />
                 </NumberInputStepper>
               </NumberInput>
+              <Text pt="2" fontSize="sm">
+                Data sizes - {batch}/{this.props.datasetSize}
+              </Text>
+              <NumberInput
+                value={datasetSize}
+                onChange={(valueString) =>
+                  this.handleAmountDatasetChange(valueString)
+                }
+                max={this.props.datasetSize}
+                min={1}
+                clampValueOnBlur={false}
+              >
+                <NumberInputField placeholder="Amount" />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
               <ButtonGroup gap="4">
                 <Button
                   colorScheme="blackAlpha"
-                  onClick={() => this.startEvaluation()}
+                  onClick={() => this.startEvaluation(batch)}
                 >
-                  Start
+                  Start(multi unstable)
+                </Button>
+                <Button
+                  colorScheme="blackAlpha"
+                  onClick={() => this.startEvaluation(1)}
+                >
+                  Start single
                 </Button>
               </ButtonGroup>
             </Stack>
@@ -79,19 +104,22 @@ class OMount extends React.Component {
     }
   }
 
-  startEvaluation = async () => {
+  startEvaluation = async (batch) => {
     const { dbNameSync, collectionSync, tableNameSync, modelCount } =
       this.props;
-    const { batch } = this.state;
+
     var batchNumber = batch;
     batchNumber = batchNumber.toString();
     try {
-      const response = await axios.post("http://"+this.props.currentHost+":4123/evaluation", {
-        dbName: dbNameSync,
-        collectionName: collectionSync,
-        tableName: tableNameSync,
-        batchNumber,
-      });
+      const response = await axios.post(
+        "http://" + this.props.currentHost + ":4123/evaluation",
+        {
+          dbName: dbNameSync,
+          collectionName: collectionSync,
+          tableName: tableNameSync,
+          batchNumber,
+        }
+      );
 
       // Handle the response (e.g., update UI, show success message, etc.)
       console.log("Evaluation response:", response.data);
@@ -108,6 +136,15 @@ class OMount extends React.Component {
       value = this.props.modelCount;
     }
     this.setState({ batch: value });
+  };
+
+  handleAmountDatasetChange = (valueString) => {
+    // Convert the string value to a number
+    var value = parseInt(valueString, 10) || 0;
+    if (value >= this.props.datasetSize) {
+      value = this.props.datasetSize;
+    }
+    this.setState({ datasetSize: value });
   };
 
   showSelectedPopulation() {

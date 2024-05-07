@@ -205,6 +205,7 @@ func randomizeNetworkStaticTesting() string {
 	modelJSON, _ := json.MarshalIndent(model, "", "  ")
 	return string(modelJSON)
 }
+
 func startEvaluation(dbName string, collectionName string, batchSize string) {
 	//dbName := "db_df6d2eb2-1890-4674-ab4e-a4009947574c"
 	//collectionName := "col_c8f4f784-85b5-4c4e-b1e5-614f1bdda83d"
