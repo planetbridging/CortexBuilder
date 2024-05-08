@@ -64,7 +64,7 @@ class OMount extends React.Component {
                 </NumberInputStepper>
               </NumberInput>
               <Text pt="2" fontSize="sm">
-                Data sizes - {batch}/{this.props.datasetSize}
+                Data sizes - {datasetSize}/{this.props.datasetSize}
               </Text>
               <NumberInput
                 value={datasetSize}

@@ -40,6 +40,9 @@ The ENAS project is designed to develop a flexible and scalable system for evolv
 
 ## Key Components and Concepts
 
+![Project Progress](ENAS.drawio.png)
+
+
 ### 1. **Genome Representation**
 
 - **Nodes**: Represents neurons in the neural network, categorized as input, hidden, or output.
