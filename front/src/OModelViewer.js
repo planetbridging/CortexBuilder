@@ -1,11 +1,22 @@
 import React from "react";
 import axios from "axios";
-import { Box, Text, Button } from "@chakra-ui/react";
+import {
+  Box, Text, Button, Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+} from "@chakra-ui/react";
 import { FullFileBrowser, setChonkyDefaults } from "chonky";
 import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import { defineFileAction, ChonkyIconName } from "chonky";
 
 import { OFFNN } from "./OFFNN";
+import ONeuralNetworkViewer from "./ONeuralNetworkViewer";
+
+
 
 setChonkyDefaults({ iconComponent: ChonkyIconFA });
 
@@ -16,6 +27,8 @@ class OModelViewer extends React.Component {
     files: [],
     folderChain: [{ id: "root", name: "Home" }],
     currentPath: "root", // Start at root which shows databases
+    isOpen: false,
+    browserModelMounted: null,
   };
 
   componentDidMount() {
@@ -87,14 +100,8 @@ class OModelViewer extends React.Component {
         `http://${this.props.currentHost}:1789/getModel?dbName=${dbName}&collectionName=${collectionName}&modelId=${modelId}`
       )
       .then((response) => {
-        console.log("Model data:", response.data);
-        console.log("--------running model testing-------");
-        const nn = new OFFNN(response.data);
 
-        // Example input values - adjust based on your actual input configuration
-        const inputValues = { 1: 1, 2: 0.5, 3: 0.75 };
-        const outputs = nn.feedforward(inputValues);
-        console.log("Network outputs:", outputs);
+        this.setState({ isOpen: true, browserModelMounted: response.data });
       })
       .catch((error) => console.error("Error fetching model:", error));
   };
@@ -135,8 +142,8 @@ class OModelViewer extends React.Component {
       const collectionName = pathParts[1];
 
 
-      if(this.props.onDataUpdate){
-        this.props.onDataUpdate(dbName,collectionName);
+      if (this.props.onDataUpdate) {
+        this.props.onDataUpdate(dbName, collectionName);
       }
 
       // Log the required data
@@ -145,7 +152,10 @@ class OModelViewer extends React.Component {
         `Database: ${dbName}`,
         `Collection: ${collectionName}`
       );*/
-    } 
+    }
+
+
+
   };
 
   setupFileActions = () => {
@@ -174,7 +184,21 @@ class OModelViewer extends React.Component {
       shouldShow: (files) => files.length === 1 && !files[0].isDir,
     });
 
-    return [openFolderAction,mountPopulationAction];
+    /*const viewModelAction = defineFileAction({
+      id: "view_model",
+      button: {
+        name: "View Model", // Label for the button
+        toolbar: false, // Show only in context menu
+        contextMenu: true,
+        icon: ChonkyIconName.users, // Example icon 
+      },
+      // Disable hotkey for this action
+      hotkeys: [],
+      // Check if the file is not a directory
+      shouldShow: (files) => files.length === 1 && !files[0].isDir,
+    });*/
+
+    return [openFolderAction, mountPopulationAction];
   };
 
   navigateUp = () => {
@@ -186,9 +210,46 @@ class OModelViewer extends React.Component {
     }
   };
 
+  runStaticModelInputTesting() {
+    const { browserModelMounted } = this.state;
+    if (browserModelMounted != null) {
+      console.log("Model data:", browserModelMounted);
+      console.log("--------running model testing-------");
+      const nn = new OFFNN(browserModelMounted);
+      
+      // Example input values - adjust based on your actual input configuration
+      const inputValues = { 1: 1, 2: 0.5, 3: 0.75 };
+      const outputs = nn.feedforward(inputValues);
+      console.log("Network outputs:", outputs);
+      
+      // Use JSON.stringify to convert outputs object to a string
+      alert(JSON.stringify(outputs));
+      
+    }
+
+  }
+
   render() {
+    const { isOpen, browserModelMounted } = this.state;
+    var showVisualModel = <></>;
+    if (browserModelMounted != null) {
+      showVisualModel = <ONeuralNetworkViewer network={browserModelMounted} />
+    }
     return (
       <Box h="90%">
+        <Modal size={'full'} isOpen={isOpen}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>View selected model  <Button onClick={() => this.setState({ isOpen: false })}>Close</Button></ModalHeader>
+
+            <ModalBody>
+              {showVisualModel}
+            </ModalBody>
+            <ModalFooter>
+              <Button onClick={() => this.runStaticModelInputTesting()}>Run model</Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
         <Text fontSize="3xl">Model Viewer</Text>
         <Button onClick={this.navigateUp} colorScheme="blue" m={2}>
           Go Up

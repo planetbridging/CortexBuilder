@@ -12,17 +12,3 @@ type EvaluationMetrics struct {
 	MSE             float64
 	RMSE            float64
 }
-
-
-Image Classification
-Object Detection
-Image Segmentation
-Zero-Shot Image Classification
-Text Classification
-Token Classification
-Table Question Answering
-Question Answering
-Zero-Shot Classification
-Feature Extraction (Image and Text)
-Tabular Classification
-Tabular Regression

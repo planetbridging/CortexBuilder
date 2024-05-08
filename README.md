@@ -42,7 +42,6 @@ The ENAS project is designed to develop a flexible and scalable system for evolv
 
 ![Project Progress](ENAS.drawio.png)
 
-
 ### 1. **Genome Representation**
 
 - **Nodes**: Represents neurons in the neural network, categorized as input, hidden, or output.
