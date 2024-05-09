@@ -243,6 +243,10 @@ func runEvaluation(c *fiber.Ctx) error {
 		Batch          string `json:"batchNumber"` // Corrected capitalization
 	}
 
+	c.Set("Access-Control-Allow-Origin", "*")
+	c.Set("Access-Control-Allow-Methods", "POST")
+	c.Set("Access-Control-Allow-Headers", "Content-Type")
+
 	// Instance of the struct to hold your POST data
 	data := new(RequestData)
 

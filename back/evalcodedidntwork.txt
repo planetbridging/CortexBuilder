@@ -1,0 +1,415 @@
+
+func startEvaluation(dbName string, collectionName string, batchSize string, tableName string) {
+	batchSizeInt, err := strconv.Atoi(batchSize)
+	if err != nil {
+		fmt.Println("Error converting batchSize to integer:", err)
+		return
+	}
+
+	models, err := getListModels(dbName, collectionName, batchSizeInt)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Get the total number of rows in the MySQL database
+	rowCount, err := GetRowCount(DBJB, tableName)
+	if err != nil {
+		log.Fatal("Error getting row count:", err)
+	}
+
+	// Calculate the number of rows for training (70%) and validation (30%)
+	trainingSize := int(float64(rowCount) * 0.7)
+	validationSize := rowCount - trainingSize
+
+	// Specify the columns needed for model evaluation
+	columns := []string{"id_auto_increment", "input1", "input2", "input3", "output1", "output2", "output3"}
+
+	// Process models concurrently
+	var wg sync.WaitGroup
+	results := make(chan map[string]interface{}, len(models)) // Channel to collect results
+	for _, model := range models {
+		wg.Add(1)
+		go func(m map[string]interface{}) {
+			defer wg.Done()
+			result := processModel(m, dbName, collectionName, tableName, 0, trainingSize, trainingSize, validationSize, columns)
+			results <- result // Send the result to the channel
+		}(model)
+	}
+	wg.Wait()
+	close(results) // Close the channel after all goroutines finish
+
+	// Collect results from the channel
+	var processedModels []map[string]interface{}
+	for result := range results {
+		processedModels = append(processedModels, result)
+	}
+
+	// Print the processed models
+	for _, m := range processedModels {
+		fmt.Printf("Model ID: %s\n", m["modelID"])
+		fmt.Printf("Outputs: %s\n", m["outputs"])
+		fmt.Printf("Evaluation Metrics: %+v\n", m["evaluationMetrics"])
+	}
+}
+
+func processModel(model map[string]interface{}, dbName string, collectionName string, tableName string, trainingStart, trainingEnd, validationStart, validationEnd int, columns []string) map[string]interface{} {
+	modelID := model["_id"].(string)
+
+	// Make an additional HTTP request to getModel
+	getModelURL := fmt.Sprintf("http://localhost:1789/getModel?dbName=%s&collectionName=%s&modelId=%s", dbName, collectionName, modelID)
+	resp, err := http.Get(getModelURL)
+	if err != nil {
+		fmt.Println("Error fetching model details:", err)
+	}
+	defer resp.Body.Close()
+
+	// Parse the response (assuming it's JSON)
+	var modelDetails NetworkConfig
+	err = json.NewDecoder(resp.Body).Decode(&modelDetails)
+	if err != nil {
+		fmt.Println("Error decoding model details:", err)
+	}
+
+	// Prepare input values for training and validation data
+	trainingInputs := prepareInputValues(DBJB, tableName, trainingStart, trainingEnd, columns)
+	validationInputs := prepareInputValues(DBJB, tableName, validationStart, validationEnd, columns)
+
+	// Perform feedforward on training and validation data
+	trainingOutputs := feedforwardBatch(&modelDetails, trainingInputs)
+	validationOutputs := feedforwardBatch(&modelDetails, validationInputs)
+
+	// Calculate evaluation metrics
+	evaluationMetrics := calculateEvaluationMetrics(trainingOutputs, validationOutputs, DBJB, tableName, trainingStart, trainingEnd, validationStart, validationEnd, columns)
+
+	// Return the processed model
+	return map[string]interface{}{
+		"modelID":           modelID,
+		"outputs":           trainingOutputs,
+		"evaluationMetrics": evaluationMetrics,
+	}
+}
+
+func prepareInputValues(db *sql.DB, tableName string, startIndex, endIndex int, columns []string) []map[string]float64 {
+	data, err := getDataFromMySQL(db, tableName, startIndex, endIndex, columns)
+	if err != nil {
+		log.Fatal("Error fetching data:", err)
+	}
+
+	var inputs []map[string]float64
+	for _, item := range data {
+		input := make(map[string]float64)
+		for key, value := range item {
+			if key == "input1" || key == "input2" || key == "input3" {
+				floatValue, _ := strconv.ParseFloat(fmt.Sprintf("%v", value), 64)
+				input[key] = floatValue
+			}
+		}
+		inputs = append(inputs, input)
+	}
+	return inputs
+}
+
+func feedforwardBatch(config *NetworkConfig, inputs []map[string]float64) []map[string]float64 {
+	var outputs []map[string]float64
+	for _, input := range inputs {
+		output := feedforward(config, input)
+		outputs = append(outputs, output)
+	}
+	return outputs
+}
+
+func calculateEvaluationMetrics(trainingOutputs []map[string]float64, validationOutputs []map[string]float64, db *sql.DB, tableName string, trainingStart, trainingEnd, validationStart, validationEnd int, columns []string) EvaluationMetrics {
+	var metrics EvaluationMetrics
+
+	// Calculate training error
+	metrics.TrainingError = calculateError(trainingOutputs, db, tableName, trainingStart, trainingEnd, columns)
+
+	// Calculate validation error
+	metrics.ValidationError = calculateError(validationOutputs, db, tableName, validationStart, validationEnd, columns)
+
+	// Calculate accuracy
+	metrics.Accuracy = calculateAccuracy(validationOutputs, db, tableName, validationStart, validationEnd, columns)
+
+	// Calculate precision
+	metrics.Precision = calculatePrecision(validationOutputs, db, tableName, validationStart, validationEnd, columns)
+
+	// Calculate recall
+	metrics.Recall = calculateRecall(validationOutputs, db, tableName, validationStart, validationEnd, columns)
+
+	// Calculate F1 score
+	metrics.F1Score = calculateF1Score(metrics.Precision, metrics.Recall)
+
+	// Calculate AUC-ROC
+	metrics.AUCROC = calculateAUCROC(validationOutputs, db, tableName, validationStart, validationEnd, columns)
+
+	// Calculate MAE
+	metrics.MAE = calculateMAE(validationOutputs, db, tableName, validationStart, validationEnd, columns)
+
+	// Calculate MSE
+	metrics.MSE = calculateMSE(validationOutputs, db, tableName, validationStart, validationEnd, columns)
+
+	// Calculate RMSE
+	metrics.RMSE = math.Sqrt(metrics.MSE)
+
+	return metrics
+}
+
+func calculateError(outputs []map[string]float64, db *sql.DB, tableName string, startIndex, endIndex int, columns []string) float64 {
+	data, err := getDataFromMySQL(db, tableName, startIndex, endIndex, columns)
+	if err != nil {
+		log.Fatal("Error fetching data:", err)
+	}
+
+	var totalError float64
+	for i, item := range data {
+		expectedOutput1, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output1"]), 64)
+		expectedOutput2, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output2"]), 64)
+		expectedOutput3, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output3"]), 64)
+
+		predictedOutput1 := outputs[i]["5"]
+		predictedOutput2 := outputs[i]["6"]
+		predictedOutput3 := outputs[i]["7"]
+
+		error1 := expectedOutput1 - predictedOutput1
+		error2 := expectedOutput2 - predictedOutput2
+		error3 := expectedOutput3 - predictedOutput3
+
+		totalError += math.Pow(error1, 2) + math.Pow(error2, 2) + math.Pow(error3, 2)
+	}
+
+	meanError := totalError / float64(len(data))
+	return math.Sqrt(meanError)
+}
+
+func calculateAccuracy(outputs []map[string]float64, db *sql.DB, tableName string, startIndex, endIndex int, columns []string) float64 {
+	data, err := getDataFromMySQL(db, tableName, startIndex, endIndex, columns)
+	if err != nil {
+		log.Fatal("Error fetching data:", err)
+	}
+
+	var correctPredictions int
+	for i, item := range data {
+		expectedOutput1, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output1"]), 64)
+		expectedOutput2, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output2"]), 64)
+		expectedOutput3, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output3"]), 64)
+
+		predictedOutput1 := outputs[i]["5"]
+		predictedOutput2 := outputs[i]["6"]
+		predictedOutput3 := outputs[i]["7"]
+
+		if math.Round(predictedOutput1) == expectedOutput1 &&
+			math.Round(predictedOutput2) == expectedOutput2 &&
+			math.Round(predictedOutput3) == expectedOutput3 {
+			correctPredictions++
+		}
+	}
+
+	accuracy := float64(correctPredictions) / float64(len(data))
+	return accuracy
+}
+
+func calculatePrecision(outputs []map[string]float64, db *sql.DB, tableName string, startIndex, endIndex int, columns []string) float64 {
+	data, err := getDataFromMySQL(db, tableName, startIndex, endIndex, columns)
+	if err != nil {
+		log.Fatal("Error fetching data:", err)
+	}
+
+	var truePositives, falsePositives int
+	for i, item := range data {
+		expectedOutput1, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output1"]), 64)
+		expectedOutput2, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output2"]), 64)
+		expectedOutput3, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output3"]), 64)
+
+		predictedOutput1 := outputs[i]["5"]
+		predictedOutput2 := outputs[i]["6"]
+		predictedOutput3 := outputs[i]["7"]
+
+		if math.Round(predictedOutput1) == 1 && expectedOutput1 == 1 {
+			truePositives++
+		} else if math.Round(predictedOutput1) == 1 && expectedOutput1 == 0 {
+			falsePositives++
+		}
+
+		if math.Round(predictedOutput2) == 1 && expectedOutput2 == 1 {
+			truePositives++
+		} else if math.Round(predictedOutput2) == 1 && expectedOutput2 == 0 {
+			falsePositives++
+		}
+
+		if math.Round(predictedOutput3) == 1 && expectedOutput3 == 1 {
+			truePositives++
+		} else if math.Round(predictedOutput3) == 1 && expectedOutput3 == 0 {
+			falsePositives++
+		}
+	}
+
+	precision := float64(truePositives) / float64(truePositives+falsePositives)
+	return precision
+}
+
+func calculateRecall(outputs []map[string]float64, db *sql.DB, tableName string, startIndex, endIndex int, columns []string) float64 {
+	data, err := getDataFromMySQL(db, tableName, startIndex, endIndex, columns)
+	if err != nil {
+		log.Fatal("Error fetching data:", err)
+	}
+
+	var truePositives, falseNegatives int
+	for i, item := range data {
+		expectedOutput1, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output1"]), 64)
+		expectedOutput2, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output2"]), 64)
+		expectedOutput3, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output3"]), 64)
+
+		predictedOutput1 := outputs[i]["5"]
+		predictedOutput2 := outputs[i]["6"]
+		predictedOutput3 := outputs[i]["7"]
+
+		if math.Round(predictedOutput1) == 1 && expectedOutput1 == 1 {
+			truePositives++
+		} else if math.Round(predictedOutput1) == 0 && expectedOutput1 == 1 {
+			falseNegatives++
+		}
+
+		if math.Round(predictedOutput2) == 1 && expectedOutput2 == 1 {
+			truePositives++
+		} else if math.Round(predictedOutput2) == 0 && expectedOutput2 == 1 {
+			falseNegatives++
+		}
+
+		if math.Round(predictedOutput3) == 1 && expectedOutput3 == 1 {
+			truePositives++
+		} else if math.Round(predictedOutput3) == 0 && expectedOutput3 == 1 {
+			falseNegatives++
+		}
+	}
+
+	recall := float64(truePositives) / float64(truePositives+falseNegatives)
+	return recall
+}
+
+func calculateF1Score(precision float64, recall float64) float64 {
+	f1Score := 2 * (precision * recall) / (precision + recall)
+	return f1Score
+}
+
+func calculateAUCROC(outputs []map[string]float64, db *sql.DB, tableName string, startIndex, endIndex int, columns []string) float64 {
+	data, err := getDataFromMySQL(db, tableName, startIndex, endIndex, columns)
+	if err != nil {
+		log.Fatal("Error fetching data:", err)
+	}
+
+	var truePositiveRate, falsePositiveRate []float64
+	var thresholds []float64
+
+	// Calculate true positive rate and false positive rate for various thresholds
+	for _, threshold := range thresholds {
+		var truePositives, falsePositives, trueNegatives, falseNegatives int
+
+		for i, item := range data {
+			expectedOutput1, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output1"]), 64)
+			expectedOutput2, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output2"]), 64)
+			expectedOutput3, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output3"]), 64)
+
+			predictedOutput1 := outputs[i]["5"]
+			predictedOutput2 := outputs[i]["6"]
+			predictedOutput3 := outputs[i]["7"]
+
+			if predictedOutput1 >= threshold && expectedOutput1 == 1 {
+				truePositives++
+			} else if predictedOutput1 >= threshold && expectedOutput1 == 0 {
+				falsePositives++
+			} else if predictedOutput1 < threshold && expectedOutput1 == 0 {
+				trueNegatives++
+			} else if predictedOutput1 < threshold && expectedOutput1 == 1 {
+				falseNegatives++
+			}
+
+			if predictedOutput2 >= threshold && expectedOutput2 == 1 {
+				truePositives++
+			} else if predictedOutput2 >= threshold && expectedOutput2 == 0 {
+				falsePositives++
+			} else if predictedOutput2 < threshold && expectedOutput2 == 0 {
+				trueNegatives++
+			} else if predictedOutput2 < threshold && expectedOutput2 == 1 {
+				falseNegatives++
+			}
+
+			if predictedOutput3 >= threshold && expectedOutput3 == 1 {
+				truePositives++
+			} else if predictedOutput3 >= threshold && expectedOutput3 == 0 {
+				falsePositives++
+			} else if predictedOutput3 < threshold && expectedOutput3 == 0 {
+				trueNegatives++
+			} else if predictedOutput3 < threshold && expectedOutput3 == 1 {
+				falseNegatives++
+			}
+		}
+
+		tpr := float64(truePositives) / float64(truePositives+falseNegatives)
+		fpr := float64(falsePositives) / float64(falsePositives+trueNegatives)
+
+		truePositiveRate = append(truePositiveRate, tpr)
+		falsePositiveRate = append(falsePositiveRate, fpr)
+	}
+
+	// Calculate the area under the ROC curve using the trapezoidal rule
+	var auc float64
+	for i := 1; i < len(truePositiveRate); i++ {
+		auc += (falsePositiveRate[i] - falsePositiveRate[i-1]) * (truePositiveRate[i] + truePositiveRate[i-1]) / 2
+	}
+
+	return auc
+}
+
+func calculateMAE(outputs []map[string]float64, db *sql.DB, tableName string, startIndex, endIndex int, columns []string) float64 {
+	data, err := getDataFromMySQL(db, tableName, startIndex, endIndex, columns)
+	if err != nil {
+		log.Fatal("Error fetching data:", err)
+	}
+
+	var totalAbsoluteError float64
+	for i, item := range data {
+		expectedOutput1, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output1"]), 64)
+		expectedOutput2, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output2"]), 64)
+		expectedOutput3, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output3"]), 64)
+
+		predictedOutput1 := outputs[i]["5"]
+		predictedOutput2 := outputs[i]["6"]
+		predictedOutput3 := outputs[i]["7"]
+
+		absoluteError1 := math.Abs(expectedOutput1 - predictedOutput1)
+		absoluteError2 := math.Abs(expectedOutput2 - predictedOutput2)
+		absoluteError3 := math.Abs(expectedOutput3 - predictedOutput3)
+
+		totalAbsoluteError += absoluteError1 + absoluteError2 + absoluteError3
+	}
+
+	mae := totalAbsoluteError / float64(len(data)*3)
+	return mae
+}
+
+func calculateMSE(outputs []map[string]float64, db *sql.DB, tableName string, startIndex, endIndex int, columns []string) float64 {
+	data, err := getDataFromMySQL(db, tableName, startIndex, endIndex, columns)
+	if err != nil {
+		log.Fatal("Error fetching data:", err)
+	}
+
+	var totalSquaredError float64
+	for i, item := range data {
+		expectedOutput1, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output1"]), 64)
+		expectedOutput2, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output2"]), 64)
+		expectedOutput3, _ := strconv.ParseFloat(fmt.Sprintf("%v", item["output3"]), 64)
+
+		predictedOutput1 := outputs[i]["5"]
+		predictedOutput2 := outputs[i]["6"]
+		predictedOutput3 := outputs[i]["7"]
+
+		squaredError1 := math.Pow(expectedOutput1-predictedOutput1, 2)
+		squaredError2 := math.Pow(expectedOutput2-predictedOutput2, 2)
+		squaredError3 := math.Pow(expectedOutput3-predictedOutput3, 2)
+
+		totalSquaredError += squaredError1 + squaredError2 + squaredError3
+	}
+
+	mse := totalSquaredError / float64(len(data)*3)
+	return mse
+}
